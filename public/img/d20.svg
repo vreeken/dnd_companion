@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg id="d20_anim_icon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="720px" height="720px" viewBox="0 0 720 720" enable-background="new 0 0 720 720" xml:space="preserve">
+	<polygon id="d20_outside" fill="none" stroke="#000000" stroke-width="20" stroke-miterlimit="10" points="355.933,124.834 153.167,241.167 153.167,481.834 360,598.5 569.833,481.834 569.833,241.167 360,122.5" />
+	<polygon id="d20_inside" fill="none" stroke="#000000" stroke-width="20" stroke-linejoin="round" stroke-miterlimit="10" points="360,122.5 245.167,293.5 153.167,481.834 361.873,494.5 569.833,481.834 475.833,293.5" />
+	<polyline id="d20_line1" fill="none" stroke="#000000" stroke-width="20" stroke-miterlimit="10" points="153.167,241.167 245.167,293.5 475.833,293.5" />
+	<polyline id="d20_line2" fill="none" stroke="#000000" stroke-width="20" stroke-miterlimit="10" points="245.167,293.5 360,494.5 360,598.5" />
+	<polyline id="d20_line3" fill="none" stroke="#000000" stroke-width="20" stroke-miterlimit="10" points="361.873,494.5 475.833,293.5 569.833,241.167" />
+</svg>

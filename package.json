@@ -1,0 +1,35 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "npm run development",
+    "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "prod": "npm run production",
+    "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "watch": "npm run development -- --watch",
+    "watch-poll": "npm run watch -- --watch-poll",
+    "lint": "eslint --ext .js,.vue resources/js/"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-eslint": "^3.4.1",
+    "@vue/eslint-config-prettier": "^4.0.1",
+    "axios": "^0.18",
+    "babel-eslint": "^10.0.1",
+    "cross-env": "^5.1",
+    "eslint": "^5.14.1",
+    "eslint-loader": "^2.1.2",
+    "eslint-plugin-vue": "^5.2.2",
+    "laravel-mix": "^4.0.7",
+    "resolve-url-loader": "^2.3.2",
+    "sass": "^1.17.2",
+    "sass-loader": "^7.1.0",
+    "vue": "^2.6.7",
+    "vue-template-compiler": "^2.6.7",
+    "watch": "^1.0.2"
+  },
+  "main": "resources/js/app.js",
+  "dependencies": {
+    "browserify-zlib": "^0.2.0",
+    "json5": "^2.1.0"
+  }
+}
