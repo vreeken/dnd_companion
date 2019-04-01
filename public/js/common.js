@@ -1,4 +1,4 @@
-var SITE_URL = "http://rpg_companion.test";
+var SITE_URL = "https://dndcompanion.com";
 /************************************************
 			Burger Menu Toggle
 ************************************************/
