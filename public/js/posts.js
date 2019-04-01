@@ -8739,8 +8739,8 @@ var app = new Vue({
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\laragon\www\rpg_companion\resources\js\posts.js */"./resources/js/posts.js");
-module.exports = __webpack_require__(/*! C:\laragon\www\rpg_companion\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\laragon\www\dnd_companion\resources\js\posts.js */"./resources/js/posts.js");
+module.exports = __webpack_require__(/*! C:\laragon\www\dnd_companion\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

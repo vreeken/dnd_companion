@@ -78,7 +78,27 @@ export default{
 				}
 			}
 		},
-		getAppearance: function(i=-1) { return this.getValue(this.gen_appearances.appearances, i); },
+		getAppearance: function(s='f') {
+			const output_no_facial_hair = "{{body-general}} figure with {{skin-color}}, {{skin-type}} skin; {{eyes-general}} {{eyes-color}} eyes and {{eyebrows}} eyebrows set on a {{face-general}} face with a {{nose}} nose, and {{mouth}}; {{hair-general}} {{hair-color}} hair; and {{hands}} hands. Extra: {{misc}}";
+			const output_facial_hair = "{{body-general}} figure with {{skin-color}}, {{skin-type}} skin; {{eyes-general}} {{eyes-color}} eyes and {{eyebrows}} eyebrows set on a {{face-general}} face with a {{nose}} nose, {{mouth}} and {{facial-hair}}; {{hair-general}} {{hair-color}} hair; and {{hands}} hands. Extra: {{misc}}";
+			let output = s === 'M' ? output_facial_hair : output_no_facial_hair;
+			
+			//Selects all instances of "{{...}}" including brackets
+			const regex_inclusive = /({{)([^{\]]*)(}})/g;
+
+			const _this=this;
+			//Loop through and replace all instances of "{{attribute}}"
+			return output.replace(regex_inclusive, function(selectionWithBrackets) {
+				//get the value between the opening and closing brackets
+				const attribute = selectionWithBrackets.substr(2, selectionWithBrackets.length-4);
+				//assign json with list of attribute values
+				let json = _this.gen_appearances.appearances[attribute];
+				//get a random attribute value
+
+				let v = json[_this.getRandomNumber(json.length)];
+				return attribute === 'body-general' ? _this.capitalize(v) : v;
+			});
+		},
 		getBlessing: function(i=-1) { return this.getValue(this.gen_blessings.blessings, i); },
 		getBond: function(i=-1) { return this.getValue(this.gen_bonds.bonds, i); },
 		getCityPOI: function(i=-1) { return this.getValue(this.gen_city_poi["city-points-of-interest"], i); },
@@ -136,7 +156,7 @@ export default{
 
 			this.getAge(npc);
 
-			npc.appearance = this.getAppearance();
+			npc.appearance = this.getAppearance(npc.sex);
 			npc.bond = this.getBond();
 			npc.detail = this.getDetail();
 			npc.flaw = this.getFlaw();
