@@ -5,18 +5,18 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<title>{{ env('APP_TITLE') }} Terms of Service</title>		
+		<title>{{ env('APP_TITLE') }} Privacy Policy</title>		
 	</head>
 	<body>
 		<h1>Privacy Policy</h1>
 
 
-<p>Effective date: April 01, 2019</p>
+<p>Effective date: January 01, 2017</p>
 
 
-<p>RPG Companion ("us", "we", or "our") operates the https://dndcompanion.com website and the RPG Companion mobile application (hereinafter referred to as the "Service").</p>
+<p>RPG Companion / DnD Companion ("us", "we", or "our") operates the https://dndcompanion.com website and the RPG Companion mobile application (hereinafter referred to as the "Service").</p>
 
-<p>This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data. The Privacy Policy  for RPG Companion has been created with the help of <a href="https://termsfeed.com/privacy-policy/generator/">TermsFeed Privacy Policy Generator</a>.</p>
+<p>This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data. The Privacy Policy for RPG / DnD Companion has been created with the help of <a href="https://termsfeed.com/privacy-policy/generator/">TermsFeed Privacy Policy Generator</a>.</p>
 
 <p>We use your data to provide and improve the Service. By using the Service, you agree to the collection and use of information in accordance with this policy. Unless otherwise defined in this Privacy Policy, the terms used in this Privacy Policy have the same meanings as in our Terms and Conditions.</p>
 
