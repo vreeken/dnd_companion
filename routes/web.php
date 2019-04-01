@@ -12,6 +12,7 @@
 */
 
 Route::get('tos', function() { return view('tos'); });
+Route::get('privacy', function() return view('privacy'));
 
 Route::get('/', function() { return view('home'); });
 //Route::get('/', function () { return redirect()->away('https://play.google.com/store/apps/details?id=com.mpvreeken.rpgcompanion'); });
