@@ -1,5 +1,5 @@
 <template>
-	<div id="login__modal" class="modal">
+	<div id="login__modal" class="modal" :class="{'is-active': showingModal}">
 		<div class="modal-background" @click="hideLoginModal()"></div>
 		<div class="modal-content">
 			<div class="has-text-centered login-container">
@@ -7,7 +7,7 @@
 				<!--Login tab-->
 				<div id="login__modal__login" class="column login-tab" :class="{'active': activeTab==='l'}">
 					<div class="box">
-						<div class="modal__title" id="login-title">Login</div>
+						<div class="modal__title" id="login-title">{{loginTitle}}</div>
 						<figure class="avatar">
 							<img src="/img/dnd_companion_logo.svg" onerror="this.onerror=null; this.src='/img/dnd_companion_logo.png'">
 						</figure>
@@ -15,14 +15,14 @@
 							<div class="error-field" id="login-email-error" style="display: none;"></div>
 							<div class="field">
 								<div class="control">
-									<input id="login-email" class="input is-large" type="email" placeholder="Email" autofocus="">
+									<input id="login-email" class="input is-large" type="email" placeholder="Email" autofocus="" :model="lEmail">
 								</div>
 							</div>
 
 							<div class="error-field" id="login-password-error" style="display: none;"></div>
 							<div class="field">
 								<div class="control">
-									<input id="login-password" class="input is-large" type="password" placeholder="Password">
+									<input id="login-password" class="input is-large" type="password" placeholder="Password" :model="lPassword">
 								</div>
 							</div>
 							<div class="field">
@@ -31,8 +31,15 @@
 									Remember me
 								</label>
 							</div>
-							<div class="error-field" id="login-error" style="display: none;"></div>
-							<div id="login-btn" class="button is-block is-info is-large is-fullwidth" @click="login()">Login</div>
+							<div class="error-field" id="login-error" v-show="loginError.length">{{loginError}}</div>
+							<div id="login-btn" class="button is-block is-info is-large is-fullwidth" @click="login()" :class="{'busy': ajaxing}">
+								<div class="btn-normal-div">Login</div>
+								<div class="btn-busy-div spinner">
+									<div class="bounce1"></div>
+									<div class="bounce2"></div>
+									<div class="bounce3"></div>
+								</div>
+							</div>
 						</form>
 					</div>
 					<p class="login__modal__footer has-text-grey column is-8 is-offset-2">
@@ -53,26 +60,26 @@
 							<div class="error-field" id="register-username-error" style="display: none;"></div>
 							<div class="field">
 								<div class="control">
-									<input id="register-username" class="input is-large" type="text" placeholder="Username" autofocus="">
+									<input id="register-username" class="input is-large" type="text" placeholder="Username" autofocus="" :model="rUsername">
 								</div>
 							</div>
 
 							<div class="error-field" id="register-email-error" style="display: none;"></div>
 							<div class="field">
 								<div class="control">
-									<input id="register-email" class="input is-large" type="email" placeholder="Email" autofocus="">
+									<input id="register-email" class="input is-large" type="email" placeholder="Email" :model="rEmail">
 								</div>
 							</div>
 
 							<div class="error-field" id="register-password-error" style="display: none;"></div>
 							<div class="field">
 								<div class="control">
-									<input id="register-password" class="input is-large" type="password" placeholder="Password">
+									<input id="register-password" class="input is-large" type="password" placeholder="Password" :model="rPassword">
 								</div>
 							</div>
 							<div class="field">
 								<div class="control">
-									<input id="register-password-confirm" class="input is-large" type="password" placeholder="Confirm Password">
+									<input id="register-password-confirm" class="input is-large" type="password" placeholder="Confirm Password" :model="rPassword2">
 								</div>
 							</div>
 							<div class="field">
@@ -82,7 +89,14 @@
 								</label>
 							</div>
 							<div class="error-field" id="register-error" style="display: none;"></div>
-							<div id="register-btn" class="button is-block is-info is-large is-fullwidth" @click="register()">Create Account</div>
+							<div id="register-btn" class="button is-block is-info is-large is-fullwidth" @click="register()" :class="{'busy': ajaxing}">
+								<div class="btn-normal-div">Create Account</div>
+								<div class="btn-busy-div spinner">
+									<div class="bounce1"></div>
+									<div class="bounce2"></div>
+									<div class="bounce3"></div>
+								</div>
+							</div>
 						</form>
 					</div>
 					<p class="login__modal__footer has-text-grey column is-8 is-offset-2">
@@ -107,36 +121,45 @@ export default {
 	},
 	data() {
 		return {
-			navLogin: document.getElementById("navbar-login"),
-			navRegister: document.getElementById("navbar-register"),
-			navLogout: document.getElementById("nav-logout"),
-			activeTab: 'l'
+			showingModal: false,
+			loginTitle: 'Login',
+			activeTab: 'l',
+			ajaxing: false,
+			loginError: '',
+			emailError: '',
+			passwordError: '',
+			registerError: '',
+			rUsername: '',
+			rEmail: '',
+			rPassword: '',
+			rPassword2: '',
+			lEmail: '',
+			lPassword: '',
 		}
 	},
 	mounted: function() {
-		if (this.navLogin) {
-			this.navLogin.addEventListener('click', function(event) {
+		const _this = this;
+		if (document.getElementById("navbar-login")) {
+			document.getElementById("navbar-login").addEventListener('click', function(event) {
 				event.preventDefault();
-				this.showLoginModal();
+				_this.showLoginModal();
 			});
 		}
-		if (this.navRegister) {
-			this.navRegister.addEventListener('click', function(event) {
+		if (document.getElementById("navbar-register")) {
+			document.getElementById("navbar-register").addEventListener('click', function(event) {
 				event.preventDefault();
-				this.showRegisterModal();
+				_this.showRegisterModal();
 			});
 		}
-
-		if (this.navLogout) {
-			this.navLogout.addEventListener('click', function(event) {
+		if (document.getElementById("nav-logout")) {
+			document.getElementById("nav-logout").addEventListener('click', function(event) {
 				event.preventDefault();
 				localStorage.clear();
+				//TODO doesn't work?
 				document.getElementById('frm-logout').submit();
 			});
 		}
 
-
-		const _this = this;
 		EventBus.$on('showLogin', function(title) {
 			_this.showLoginModal(title);
 		});
@@ -146,124 +169,106 @@ export default {
 	},
 	methods: {
 		showLoginModal: function(title) {
-			title=title||"Login";
-			document.getElementById('login-title').innerHTML=title;
+			this.loginTitle = title || "Login";
 			this.loginModalChangeTab('l');
-			document.getElementById('login__modal').classList.add('is-active');
+			this.showingModal = true;
 		},
 		showRegisterModal: function() {
 			this.loginModalChangeTab('r');
-			document.getElementById('login__modal').classList.add('is-active');
+			this.showingModal = true;
 		},
 		hideLoginModal: function() {
-			document.getElementById('login__modal').classList.remove('is-active');
+			this.showingModal = false;
 		},
 		loginModalChangeTab: function(a) {
-			console.log(a);
 			this.activeTab = a;
 		},
 		login: function() {
-			var loginErr = document.getElementById("login-error");
-			var emErr = document.getElementById("login-email-error");
-			var pwErr = document.getElementById("login-password-error");
-			//Hide all error messages
-			loginErr.setAttribute("style", "display:none");
-			emErr.setAttribute("style", "display:none");
-			pwErr.setAttribute("style", "display:none");
+			this.loginError = '';
+			this.emailError = '';
+			this.passwordError = '';
 
-			var em = document.getElementById("login-email").value;
-			if (!em.length) {
-				emErr.innerHTML = "Please Input Your Email";
-				emErr.setAttribute("style", "display:block");
+			if (!this.lEmail.length) {
+				this.emailError = "Please Input Your Email";
 				return;
 			}
 
-			var pw = document.getElementById("login-password").value;
-			if (!pw.length) {
-				pwErr.innerHTML = "Please Input Your Password";
-				pwErr.setAttribute("style", "display:block");
+			if (!this.lPassowrd.length) {
+				this.passwordError = "Please Input Your Password";
 				return;
 			}
 
 			var re = document.querySelector('#login-remember').checked;
+			this.ajaxing=true;
+			const _this=this;
 
 			axios.post(SITE_URL+'/auth/login', {
-				email: em,
-				password: pw,
+				email: this.lEmail,
+				password: this.lPassowrd,
 				remember: re
 			}).then(function(response) {
+				_this.ajaxing=false;
 				if (response.data && response.data.jwt) {
 					//Success!
 					//Save token to Local Storage
 					localStorage.setItem('user', JSON.stringify(response.data));
 					//refresh the page
+					//TODO DON'T REFRESH, or they will lose current NPC data, what to do?
 					window.location.reload();
 				}
 				else {
-					loginErr.innerHTML = "An error occurred. Please try again.";
-					loginErr.setAttribute("style", "display:block");
+					_this.loginError = "An error occurred. Please try again.";
 				}
 			}).catch(function(error) {
+				_this.ajaxing=false;
 				if (error.response.status === 401) {
-					loginErr.innerHTML = "Invalid Email/Password";
+					_this.loginError = "Invalid Email/Password";
 				}
 				else {
-					loginErr.innerHTML = "An error occurred. Please try again.";
+					_this.loginError = "An error occurred. Please try again.";
 				}
-				loginErr.setAttribute("style", "display:block");
 			});
 		},
 		register: function() {
-			var registerErr = document.getElementById("register-error");
-			var emErr = document.getElementById("register-email-error");
-			var pwErr = document.getElementById("register-password-error");
-			var unErr = document.getElementById("register-username-error");
-			//Hide all error messages
-			registerErr.setAttribute("style", "display:none");
-			emErr.setAttribute("style", "display:none");
-			pwErr.setAttribute("style", "display:none");
-			unErr.setAttribute("style", "display:none");
+			this.registerError = '';
+			this.loginError = '';
+			this.emailError = '';
+			this.passwordError = '';
 
-			var un = document.getElementById("register-username").value;
-			if (!un.length) {
-				unErr.innerHTML = "Please Input Your Username";
-				unErr.setAttribute("style", "display:block");
-				return;
+			if (!this.rEmail.length) {
+				this.emailError = "Please Input Your Email";
 			}
-
-			var em = document.getElementById("register-email").value;
-			if (!em.length) {
-				emErr.innerHTML = "Please Input Your Email";
-				emErr.setAttribute("style", "display:block");
-				return;
+			else if (this.rEmail.indexOf('@') === -1 || this.rEmail.indexOf('.') === -1) {
+				this.emailError = "Please Input a Valid Email";
 			}
-			if (em.indexOf('@') === -1 || em.indexOf('.') === -1) {
-				emErr.innerHTML = "Please Input A Valid Email Address";
-				emErr.setAttribute("style", "display:block");
-				return;
+			
+			if (!this.rUsername.length) {
+				this.usernameError = "Please Input Your Username";
+			}
+			if (this.rPassword.length < 6) {
+				this.passwordError = "Please Input Your Password (Min 6 Characters)";
 			}
 
-			var pw = document.getElementById("register-password").value;
-			if (pw.length<6) {
-				pwErr.innerHTML = "Please Input A Password (Min 6 Characters)";
-				pwErr.setAttribute("style", "display:block");
-				return;
+			if (this.rPassword !== this.rPassword2) {
+				this.passwordError = "Your Passwords Do Not Match";
 			}
-			var pw2 = document.getElementById("register-password-confirm").value;
-			if (pw2 !== pw) {
-				pwErr.innerHTML = "Your Passwords Do Not Match";
-				pwErr.setAttribute("style", "display:block");
+
+			if (this.emailError.length || this.usernameError.length || this.passwordError.length) {
 				return;
 			}
 
 			var re = document.querySelector('#register-remember').checked;
 
+			this.ajaxing=true;
+			const _this=this;
+
 			axios.post(SITE_URL+"/auth/register", {
-				email: em,
-				username: un,
-				password: pw,
+				email: this.rEmail,
+				username: this.rUsername,
+				password: this.rPassword,
 				remember: re
 			}).then(function(response) {
+				_this.ajaxing=false;
 				if (response.data) {
 					//Success!
 					//Save token and user data to Local Storage
@@ -272,32 +277,31 @@ export default {
 					window.location.reload();
 				}
 				else {
-					registerErr.innerHTML = "An error occurred. Please try again.";
-					registerErr.setAttribute("style", "display:block");
+					_this.registerError = "An error occurred. Please try again.";
 				}
 			}).catch(function(error) {
+				_this.ajaxing=false;
 				if (error.response && error.response.data && error.response.data.error) {
 					switch(error.response.data.error) {
 					case "invalid_password":
-						registerErr.innerHTML = "Your password must be at least 6 characters long";
+						_this.registerError = "Your password must be at least 6 characters long";
 						break;
 					case "username_in_use":
-						registerErr.innerHTML = "This username is already in use";
+						_this.registerError = "This username is already in use";
 						break;
 					case "email_in_use":
-						registerErr.innerHTML = "This email is already in use";
+						_this.registerError = "This email is already in use";
 						break;
 					case "unable_to_send_email":
-						registerErr.innerHTML = "An error occurred. Please try again.";
+						_this.registerError = "An error occurred. Please try again.";
 						break;
 					default:
-						registerErr.innerHTML = "An error occurred. Please try again.";
+						_this.registerError = "An error occurred. Please try again.";
 					}
 				}
 				else {
-					registerErr.innerHTML = "An error occurred. Please try again.";
+					_this.registerError = "An error occurred. Please try again.";
 				}
-				registerErr.setAttribute("style", "display:block");
 			});
 		}
 

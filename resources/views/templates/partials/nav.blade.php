@@ -40,7 +40,7 @@
 			<a id="navbar-login" class="navbar-item" href="{{ url('auth/login') }}">
 				Login
 			</a>
-			<a id="navbar-register" class="navbar-item" href="{{ url('auth/logout') }}">
+			<a id="navbar-register" class="navbar-item" href="{{ url('auth/register') }}">
 				Register
 			</a>
 		@endif

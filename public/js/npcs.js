@@ -109,6 +109,20 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
@@ -116,36 +130,49 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      navLogin: document.getElementById("navbar-login"),
-      navRegister: document.getElementById("navbar-register"),
-      navLogout: document.getElementById("nav-logout"),
-      activeTab: 'l'
+      showingModal: false,
+      loginTitle: 'Login',
+      activeTab: 'l',
+      ajaxing: false,
+      loginError: '',
+      emailError: '',
+      passwordError: '',
+      registerError: '',
+      rUsername: '',
+      rEmail: '',
+      rPassword: '',
+      rPassword2: '',
+      lEmail: '',
+      lPassword: ''
     };
   },
   mounted: function mounted() {
-    if (this.navLogin) {
-      this.navLogin.addEventListener('click', function (event) {
+    var _this = this;
+
+    if (document.getElementById("navbar-login")) {
+      document.getElementById("navbar-login").addEventListener('click', function (event) {
         event.preventDefault();
-        this.showLoginModal();
+
+        _this.showLoginModal();
       });
     }
 
-    if (this.navRegister) {
-      this.navRegister.addEventListener('click', function (event) {
+    if (document.getElementById("navbar-register")) {
+      document.getElementById("navbar-register").addEventListener('click', function (event) {
         event.preventDefault();
-        this.showRegisterModal();
+
+        _this.showRegisterModal();
       });
     }
 
-    if (this.navLogout) {
-      this.navLogout.addEventListener('click', function (event) {
+    if (document.getElementById("nav-logout")) {
+      document.getElementById("nav-logout").addEventListener('click', function (event) {
         event.preventDefault();
-        localStorage.clear();
+        localStorage.clear(); //TODO doesn't work?
+
         document.getElementById('frm-logout').submit();
       });
     }
-
-    var _this = this;
 
     _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('showLogin', function (title) {
       _this.showLoginModal(title);
@@ -156,127 +183,108 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     showLoginModal: function showLoginModal(title) {
-      title = title || "Login";
-      document.getElementById('login-title').innerHTML = title;
+      this.loginTitle = title || "Login";
       this.loginModalChangeTab('l');
-      document.getElementById('login__modal').classList.add('is-active');
+      this.showingModal = true;
     },
     showRegisterModal: function showRegisterModal() {
       this.loginModalChangeTab('r');
-      document.getElementById('login__modal').classList.add('is-active');
+      this.showingModal = true;
     },
     hideLoginModal: function hideLoginModal() {
-      document.getElementById('login__modal').classList.remove('is-active');
+      this.showingModal = false;
     },
     loginModalChangeTab: function loginModalChangeTab(a) {
-      console.log(a);
       this.activeTab = a;
     },
     login: function login() {
-      var loginErr = document.getElementById("login-error");
-      var emErr = document.getElementById("login-email-error");
-      var pwErr = document.getElementById("login-password-error"); //Hide all error messages
+      this.loginError = '';
+      this.emailError = '';
+      this.passwordError = '';
 
-      loginErr.setAttribute("style", "display:none");
-      emErr.setAttribute("style", "display:none");
-      pwErr.setAttribute("style", "display:none");
-      var em = document.getElementById("login-email").value;
-
-      if (!em.length) {
-        emErr.innerHTML = "Please Input Your Email";
-        emErr.setAttribute("style", "display:block");
+      if (!this.lEmail.length) {
+        this.emailError = "Please Input Your Email";
         return;
       }
 
-      var pw = document.getElementById("login-password").value;
-
-      if (!pw.length) {
-        pwErr.innerHTML = "Please Input Your Password";
-        pwErr.setAttribute("style", "display:block");
+      if (!this.lPassowrd.length) {
+        this.passwordError = "Please Input Your Password";
         return;
       }
 
       var re = document.querySelector('#login-remember').checked;
+      this.ajaxing = true;
+
+      var _this = this;
+
       axios.post(SITE_URL + '/auth/login', {
-        email: em,
-        password: pw,
+        email: this.lEmail,
+        password: this.lPassowrd,
         remember: re
       }).then(function (response) {
+        _this.ajaxing = false;
+
         if (response.data && response.data.jwt) {
           //Success!
           //Save token to Local Storage
           localStorage.setItem('user', JSON.stringify(response.data)); //refresh the page
+          //TODO DON'T REFRESH, or they will lose current NPC data, what to do?
 
           window.location.reload();
         } else {
-          loginErr.innerHTML = "An error occurred. Please try again.";
-          loginErr.setAttribute("style", "display:block");
+          _this.loginError = "An error occurred. Please try again.";
         }
       }).catch(function (error) {
-        if (error.response.status === 401) {
-          loginErr.innerHTML = "Invalid Email/Password";
-        } else {
-          loginErr.innerHTML = "An error occurred. Please try again.";
-        }
+        _this.ajaxing = false;
 
-        loginErr.setAttribute("style", "display:block");
+        if (error.response.status === 401) {
+          _this.loginError = "Invalid Email/Password";
+        } else {
+          _this.loginError = "An error occurred. Please try again.";
+        }
       });
     },
     register: function register() {
-      var registerErr = document.getElementById("register-error");
-      var emErr = document.getElementById("register-email-error");
-      var pwErr = document.getElementById("register-password-error");
-      var unErr = document.getElementById("register-username-error"); //Hide all error messages
+      this.registerError = '';
+      this.loginError = '';
+      this.emailError = '';
+      this.passwordError = '';
 
-      registerErr.setAttribute("style", "display:none");
-      emErr.setAttribute("style", "display:none");
-      pwErr.setAttribute("style", "display:none");
-      unErr.setAttribute("style", "display:none");
-      var un = document.getElementById("register-username").value;
-
-      if (!un.length) {
-        unErr.innerHTML = "Please Input Your Username";
-        unErr.setAttribute("style", "display:block");
-        return;
+      if (!this.rEmail.length) {
+        this.emailError = "Please Input Your Email";
+      } else if (this.rEmail.indexOf('@') === -1 || this.rEmail.indexOf('.') === -1) {
+        this.emailError = "Please Input a Valid Email";
       }
 
-      var em = document.getElementById("register-email").value;
-
-      if (!em.length) {
-        emErr.innerHTML = "Please Input Your Email";
-        emErr.setAttribute("style", "display:block");
-        return;
+      if (!this.rUsername.length) {
+        this.usernameError = "Please Input Your Username";
       }
 
-      if (em.indexOf('@') === -1 || em.indexOf('.') === -1) {
-        emErr.innerHTML = "Please Input A Valid Email Address";
-        emErr.setAttribute("style", "display:block");
-        return;
+      if (this.rPassword.length < 6) {
+        this.passwordError = "Please Input Your Password (Min 6 Characters)";
       }
 
-      var pw = document.getElementById("register-password").value;
-
-      if (pw.length < 6) {
-        pwErr.innerHTML = "Please Input A Password (Min 6 Characters)";
-        pwErr.setAttribute("style", "display:block");
-        return;
+      if (this.rPassword !== this.rPassword2) {
+        this.passwordError = "Your Passwords Do Not Match";
       }
 
-      var pw2 = document.getElementById("register-password-confirm").value;
-
-      if (pw2 !== pw) {
-        pwErr.innerHTML = "Your Passwords Do Not Match";
-        pwErr.setAttribute("style", "display:block");
+      if (this.emailError.length || this.usernameError.length || this.passwordError.length) {
         return;
       }
 
       var re = document.querySelector('#register-remember').checked;
+      this.ajaxing = true;
+
+      var _this = this;
+
       axios.post(SITE_URL + "/auth/register", {
-        email: em,
-        username: un,
-        password: pw,
+        email: this.rEmail,
+        username: this.rUsername,
+        password: this.rPassword,
         remember: re
       }).then(function (response) {
+        _this.ajaxing = false;
+
         if (response.data) {
           //Success!
           //Save token and user data to Local Storage
@@ -284,36 +292,35 @@ __webpack_require__.r(__webpack_exports__);
 
           window.location.reload();
         } else {
-          registerErr.innerHTML = "An error occurred. Please try again.";
-          registerErr.setAttribute("style", "display:block");
+          _this.registerError = "An error occurred. Please try again.";
         }
       }).catch(function (error) {
+        _this.ajaxing = false;
+
         if (error.response && error.response.data && error.response.data.error) {
           switch (error.response.data.error) {
             case "invalid_password":
-              registerErr.innerHTML = "Your password must be at least 6 characters long";
+              _this.registerError = "Your password must be at least 6 characters long";
               break;
 
             case "username_in_use":
-              registerErr.innerHTML = "This username is already in use";
+              _this.registerError = "This username is already in use";
               break;
 
             case "email_in_use":
-              registerErr.innerHTML = "This email is already in use";
+              _this.registerError = "This email is already in use";
               break;
 
             case "unable_to_send_email":
-              registerErr.innerHTML = "An error occurred. Please try again.";
+              _this.registerError = "An error occurred. Please try again.";
               break;
 
             default:
-              registerErr.innerHTML = "An error occurred. Please try again.";
+              _this.registerError = "An error occurred. Please try again.";
           }
         } else {
-          registerErr.innerHTML = "An error occurred. Please try again.";
+          _this.registerError = "An error occurred. Please try again.";
         }
-
-        registerErr.setAttribute("style", "display:block");
       });
     }
   }
@@ -2993,215 +3000,322 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "modal", attrs: { id: "login__modal" } }, [
-    _c("div", {
-      staticClass: "modal-background",
-      on: {
-        click: function($event) {
-          return _vm.hideLoginModal()
+  return _c(
+    "div",
+    {
+      staticClass: "modal",
+      class: { "is-active": _vm.showingModal },
+      attrs: { id: "login__modal" }
+    },
+    [
+      _c("div", {
+        staticClass: "modal-background",
+        on: {
+          click: function($event) {
+            return _vm.hideLoginModal()
+          }
         }
-      }
-    }),
-    _vm._v(" "),
-    _c("div", { staticClass: "modal-content" }, [
-      _c("div", { staticClass: "has-text-centered login-container" }, [
-        _c(
-          "div",
-          {
-            staticClass: "column login-tab",
-            class: { active: _vm.activeTab === "l" },
-            attrs: { id: "login__modal__login" }
-          },
-          [
-            _c("div", { staticClass: "box" }, [
+      }),
+      _vm._v(" "),
+      _c("div", { staticClass: "modal-content" }, [
+        _c("div", { staticClass: "has-text-centered login-container" }, [
+          _c(
+            "div",
+            {
+              staticClass: "column login-tab",
+              class: { active: _vm.activeTab === "l" },
+              attrs: { id: "login__modal__login" }
+            },
+            [
+              _c("div", { staticClass: "box" }, [
+                _c(
+                  "div",
+                  { staticClass: "modal__title", attrs: { id: "login-title" } },
+                  [_vm._v(_vm._s(_vm.loginTitle))]
+                ),
+                _vm._v(" "),
+                _vm._m(0),
+                _vm._v(" "),
+                _c("form", [
+                  _c("div", {
+                    staticClass: "error-field",
+                    staticStyle: { display: "none" },
+                    attrs: { id: "login-email-error" }
+                  }),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "field" }, [
+                    _c("div", { staticClass: "control" }, [
+                      _c("input", {
+                        staticClass: "input is-large",
+                        attrs: {
+                          id: "login-email",
+                          type: "email",
+                          placeholder: "Email",
+                          autofocus: "",
+                          model: _vm.lEmail
+                        }
+                      })
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", {
+                    staticClass: "error-field",
+                    staticStyle: { display: "none" },
+                    attrs: { id: "login-password-error" }
+                  }),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "field" }, [
+                    _c("div", { staticClass: "control" }, [
+                      _c("input", {
+                        staticClass: "input is-large",
+                        attrs: {
+                          id: "login-password",
+                          type: "password",
+                          placeholder: "Password",
+                          model: _vm.lPassword
+                        }
+                      })
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _vm._m(1),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.loginError.length,
+                          expression: "loginError.length"
+                        }
+                      ],
+                      staticClass: "error-field",
+                      attrs: { id: "login-error" }
+                    },
+                    [_vm._v(_vm._s(_vm.loginError))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "button is-block is-info is-large is-fullwidth",
+                      class: { busy: _vm.ajaxing },
+                      attrs: { id: "login-btn" },
+                      on: {
+                        click: function($event) {
+                          return _vm.login()
+                        }
+                      }
+                    },
+                    [
+                      _c("div", { staticClass: "btn-normal-div" }, [
+                        _vm._v("Login")
+                      ]),
+                      _vm._v(" "),
+                      _vm._m(2)
+                    ]
+                  )
+                ])
+              ]),
+              _vm._v(" "),
               _c(
-                "div",
-                { staticClass: "modal__title", attrs: { id: "login-title" } },
-                [_vm._v("Login")]
-              ),
-              _vm._v(" "),
-              _vm._m(0),
-              _vm._v(" "),
-              _c("form", [
-                _c("div", {
-                  staticClass: "error-field",
-                  staticStyle: { display: "none" },
-                  attrs: { id: "login-email-error" }
-                }),
-                _vm._v(" "),
-                _vm._m(1),
-                _vm._v(" "),
-                _c("div", {
-                  staticClass: "error-field",
-                  staticStyle: { display: "none" },
-                  attrs: { id: "login-password-error" }
-                }),
-                _vm._v(" "),
-                _vm._m(2),
+                "p",
+                {
+                  staticClass:
+                    "login__modal__footer has-text-grey column is-8 is-offset-2"
+                },
+                [
+                  _c(
+                    "a",
+                    {
+                      on: {
+                        click: function($event) {
+                          return _vm.loginModalChangeTab("r")
+                        }
+                      }
+                    },
+                    [_vm._v("Sign Up")]
+                  ),
+                  _vm._v("  · \n\t\t\t\t\t"),
+                  _c("a", { attrs: { href: "../" } }, [
+                    _vm._v("Forgot Password")
+                  ]),
+                  _vm._v("  · \n\t\t\t\t\t"),
+                  _c("a", { attrs: { href: "../" } }, [_vm._v("Need Help?")])
+                ]
+              )
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "div",
+            {
+              staticClass: "column login-tab",
+              class: { active: _vm.activeTab === "r" },
+              attrs: { id: "login__modal__register" }
+            },
+            [
+              _c("div", { staticClass: "box" }, [
+                _c("div", { staticClass: "modal__title" }, [
+                  _vm._v("Create an Account")
+                ]),
                 _vm._v(" "),
                 _vm._m(3),
                 _vm._v(" "),
-                _c("div", {
-                  staticClass: "error-field",
-                  staticStyle: { display: "none" },
-                  attrs: { id: "login-error" }
-                }),
-                _vm._v(" "),
-                _c(
-                  "div",
-                  {
-                    staticClass:
-                      "button is-block is-info is-large is-fullwidth",
-                    attrs: { id: "login-btn" },
-                    on: {
-                      click: function($event) {
-                        return _vm.login()
+                _c("form", [
+                  _c("div", {
+                    staticClass: "error-field",
+                    staticStyle: { display: "none" },
+                    attrs: { id: "register-username-error" }
+                  }),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "field" }, [
+                    _c("div", { staticClass: "control" }, [
+                      _c("input", {
+                        staticClass: "input is-large",
+                        attrs: {
+                          id: "register-username",
+                          type: "text",
+                          placeholder: "Username",
+                          autofocus: "",
+                          model: _vm.rUsername
+                        }
+                      })
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", {
+                    staticClass: "error-field",
+                    staticStyle: { display: "none" },
+                    attrs: { id: "register-email-error" }
+                  }),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "field" }, [
+                    _c("div", { staticClass: "control" }, [
+                      _c("input", {
+                        staticClass: "input is-large",
+                        attrs: {
+                          id: "register-email",
+                          type: "email",
+                          placeholder: "Email",
+                          model: _vm.rEmail
+                        }
+                      })
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", {
+                    staticClass: "error-field",
+                    staticStyle: { display: "none" },
+                    attrs: { id: "register-password-error" }
+                  }),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "field" }, [
+                    _c("div", { staticClass: "control" }, [
+                      _c("input", {
+                        staticClass: "input is-large",
+                        attrs: {
+                          id: "register-password",
+                          type: "password",
+                          placeholder: "Password",
+                          model: _vm.rPassword
+                        }
+                      })
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "field" }, [
+                    _c("div", { staticClass: "control" }, [
+                      _c("input", {
+                        staticClass: "input is-large",
+                        attrs: {
+                          id: "register-password-confirm",
+                          type: "password",
+                          placeholder: "Confirm Password",
+                          model: _vm.rPassword2
+                        }
+                      })
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _vm._m(4),
+                  _vm._v(" "),
+                  _c("div", {
+                    staticClass: "error-field",
+                    staticStyle: { display: "none" },
+                    attrs: { id: "register-error" }
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "button is-block is-info is-large is-fullwidth",
+                      class: { busy: _vm.ajaxing },
+                      attrs: { id: "register-btn" },
+                      on: {
+                        click: function($event) {
+                          return _vm.register()
+                        }
                       }
-                    }
-                  },
-                  [_vm._v("Login")]
-                )
-              ])
-            ]),
-            _vm._v(" "),
-            _c(
-              "p",
-              {
-                staticClass:
-                  "login__modal__footer has-text-grey column is-8 is-offset-2"
-              },
-              [
-                _c(
-                  "a",
-                  {
-                    on: {
-                      click: function($event) {
-                        return _vm.loginModalChangeTab("r")
-                      }
-                    }
-                  },
-                  [_vm._v("Sign Up")]
-                ),
-                _vm._v("  · \n\t\t\t\t\t"),
-                _c("a", { attrs: { href: "../" } }, [
-                  _vm._v("Forgot Password")
-                ]),
-                _vm._v("  · \n\t\t\t\t\t"),
-                _c("a", { attrs: { href: "../" } }, [_vm._v("Need Help?")])
-              ]
-            )
-          ]
-        ),
-        _vm._v(" "),
-        _c(
-          "div",
-          {
-            staticClass: "column login-tab",
-            class: { active: _vm.activeTab === "r" },
-            attrs: { id: "login__modal__register" }
-          },
-          [
-            _c("div", { staticClass: "box" }, [
-              _c("div", { staticClass: "modal__title" }, [
-                _vm._v("Create an Account")
+                    },
+                    [
+                      _c("div", { staticClass: "btn-normal-div" }, [
+                        _vm._v("Create Account")
+                      ]),
+                      _vm._v(" "),
+                      _vm._m(5)
+                    ]
+                  )
+                ])
               ]),
               _vm._v(" "),
-              _vm._m(4),
-              _vm._v(" "),
-              _c("form", [
-                _c("div", {
-                  staticClass: "error-field",
-                  staticStyle: { display: "none" },
-                  attrs: { id: "register-username-error" }
-                }),
-                _vm._v(" "),
-                _vm._m(5),
-                _vm._v(" "),
-                _c("div", {
-                  staticClass: "error-field",
-                  staticStyle: { display: "none" },
-                  attrs: { id: "register-email-error" }
-                }),
-                _vm._v(" "),
-                _vm._m(6),
-                _vm._v(" "),
-                _c("div", {
-                  staticClass: "error-field",
-                  staticStyle: { display: "none" },
-                  attrs: { id: "register-password-error" }
-                }),
-                _vm._v(" "),
-                _vm._m(7),
-                _vm._v(" "),
-                _vm._m(8),
-                _vm._v(" "),
-                _vm._m(9),
-                _vm._v(" "),
-                _c("div", {
-                  staticClass: "error-field",
-                  staticStyle: { display: "none" },
-                  attrs: { id: "register-error" }
-                }),
-                _vm._v(" "),
-                _c(
-                  "div",
-                  {
-                    staticClass:
-                      "button is-block is-info is-large is-fullwidth",
-                    attrs: { id: "register-btn" },
-                    on: {
-                      click: function($event) {
-                        return _vm.register()
+              _c(
+                "p",
+                {
+                  staticClass:
+                    "login__modal__footer has-text-grey column is-8 is-offset-2"
+                },
+                [
+                  _c(
+                    "a",
+                    {
+                      on: {
+                        click: function($event) {
+                          return _vm.loginModalChangeTab("l")
+                        }
                       }
-                    }
-                  },
-                  [_vm._v("Create Account")]
-                )
-              ])
-            ]),
-            _vm._v(" "),
-            _c(
-              "p",
-              {
-                staticClass:
-                  "login__modal__footer has-text-grey column is-8 is-offset-2"
-              },
-              [
-                _c(
-                  "a",
-                  {
-                    on: {
-                      click: function($event) {
-                        return _vm.loginModalChangeTab("l")
-                      }
-                    }
-                  },
-                  [_vm._v("Already have an account?")]
-                ),
-                _vm._v("  · \n\t\t\t\t\t"),
-                _c("a", { attrs: { href: "../" } }, [_vm._v("Need Help?")])
-              ]
-            )
-          ]
-        )
-      ])
-    ]),
-    _vm._v(" "),
-    _c("button", {
-      staticClass: "modal-close is-large",
-      attrs: { "aria-label": "close" },
-      on: {
-        click: function($event) {
-          return _vm.hideLoginModal()
+                    },
+                    [_vm._v("Already have an account?")]
+                  ),
+                  _vm._v("  · \n\t\t\t\t\t"),
+                  _c("a", { attrs: { href: "../" } }, [_vm._v("Need Help?")])
+                ]
+              )
+            ]
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _c("button", {
+        staticClass: "modal-close is-large",
+        attrs: { "aria-label": "close" },
+        on: {
+          click: function($event) {
+            return _vm.hideLoginModal()
+          }
         }
-      }
-    }),
-    _vm._v(" "),
-    _c("form", {
-      staticStyle: { display: "none" },
-      attrs: { id: "frm-logout", action: "/auth/logout", method: "POST" }
-    })
-  ])
+      }),
+      _vm._v(" "),
+      _c("form", {
+        staticStyle: { display: "none" },
+        attrs: { id: "frm-logout", action: "/auth/logout", method: "POST" }
+      })
+    ]
+  )
 }
 var staticRenderFns = [
   function() {
@@ -3222,45 +3336,22 @@ var staticRenderFns = [
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "field" }, [
-      _c("div", { staticClass: "control" }, [
-        _c("input", {
-          staticClass: "input is-large",
-          attrs: {
-            id: "login-email",
-            type: "email",
-            placeholder: "Email",
-            autofocus: ""
-          }
-        })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "field" }, [
-      _c("div", { staticClass: "control" }, [
-        _c("input", {
-          staticClass: "input is-large",
-          attrs: {
-            id: "login-password",
-            type: "password",
-            placeholder: "Password"
-          }
-        })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "field" }, [
       _c("label", { staticClass: "checkbox" }, [
         _c("input", { attrs: { id: "login-remember", type: "checkbox" } }),
         _vm._v("\n\t\t\t\t\t\t\t\tRemember me\n\t\t\t\t\t\t\t")
       ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "btn-busy-div spinner" }, [
+      _c("div", { staticClass: "bounce1" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "bounce2" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "bounce3" })
     ])
   },
   function() {
@@ -3281,80 +3372,22 @@ var staticRenderFns = [
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "field" }, [
-      _c("div", { staticClass: "control" }, [
-        _c("input", {
-          staticClass: "input is-large",
-          attrs: {
-            id: "register-username",
-            type: "text",
-            placeholder: "Username",
-            autofocus: ""
-          }
-        })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "field" }, [
-      _c("div", { staticClass: "control" }, [
-        _c("input", {
-          staticClass: "input is-large",
-          attrs: {
-            id: "register-email",
-            type: "email",
-            placeholder: "Email",
-            autofocus: ""
-          }
-        })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "field" }, [
-      _c("div", { staticClass: "control" }, [
-        _c("input", {
-          staticClass: "input is-large",
-          attrs: {
-            id: "register-password",
-            type: "password",
-            placeholder: "Password"
-          }
-        })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "field" }, [
-      _c("div", { staticClass: "control" }, [
-        _c("input", {
-          staticClass: "input is-large",
-          attrs: {
-            id: "register-password-confirm",
-            type: "password",
-            placeholder: "Confirm Password"
-          }
-        })
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "field" }, [
       _c("label", { staticClass: "checkbox" }, [
         _c("input", { attrs: { id: "register-remember", type: "checkbox" } }),
         _vm._v("\n\t\t\t\t\t\t\t\tRemember me\n\t\t\t\t\t\t\t")
       ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "btn-busy-div spinner" }, [
+      _c("div", { staticClass: "bounce1" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "bounce2" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "bounce3" })
     ])
   }
 ]
