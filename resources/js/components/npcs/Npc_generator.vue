@@ -23,6 +23,8 @@
 <script>
 import NPC_GEN_DATA from './NPC_GEN_DATA.vue';
 
+import { EventBus } from '../eventbus/EventBus.js';
+
 export default {
 	filters: {
 		fromNow: function(v) {
@@ -50,7 +52,24 @@ export default {
 		}
 	},
 	mounted: function() {
-		this.randomize();
+		EventBus.$on('postLogin', () => {
+			localStorage.setItem("flashNPC", JSON.stringify(this.npc));
+			window.location.reload();
+		});
+		EventBus.$on('postRegister', () => {
+			localStorage.setItem("flashNPC", JSON.stringify(this.npc));
+			window.location.reload();
+		});
+
+
+		let flashNPC = localStorage.getItem("flashNPC");
+		if (flashNPC !== null) {
+			this.npc = JSON.parse(flashNPC);
+			localStorage.removeItem("flashNPC");
+		}
+		else {
+			this.randomize();
+		}
 	},
 	methods: {
 		randomize: function() {

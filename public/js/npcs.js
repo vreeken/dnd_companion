@@ -135,15 +135,19 @@ __webpack_require__.r(__webpack_exports__);
       activeTab: 'l',
       ajaxing: false,
       loginError: '',
-      emailError: '',
-      passwordError: '',
+      lEmailError: '',
+      lPasswordError: '',
+      rEmailError: '',
+      rPasswordError: '',
+      rUsernameError: '',
       registerError: '',
       rUsername: '',
       rEmail: '',
       rPassword: '',
       rPassword2: '',
       lEmail: '',
-      lPassword: ''
+      lPassword: '',
+      base_url: window.location.origin
     };
   },
   mounted: function mounted() {
@@ -162,15 +166,6 @@ __webpack_require__.r(__webpack_exports__);
         event.preventDefault();
 
         _this.showRegisterModal();
-      });
-    }
-
-    if (document.getElementById("nav-logout")) {
-      document.getElementById("nav-logout").addEventListener('click', function (event) {
-        event.preventDefault();
-        localStorage.clear(); //TODO doesn't work?
-
-        document.getElementById('frm-logout').submit();
       });
     }
 
@@ -199,16 +194,16 @@ __webpack_require__.r(__webpack_exports__);
     },
     login: function login() {
       this.loginError = '';
-      this.emailError = '';
-      this.passwordError = '';
+      this.lEmailError = '';
+      this.lPasswordError = '';
 
       if (!this.lEmail.length) {
-        this.emailError = "Please Input Your Email";
+        this.lEmailError = "Please Input Your Email";
         return;
       }
 
-      if (!this.lPassowrd.length) {
-        this.passwordError = "Please Input Your Password";
+      if (!this.lPassword.length) {
+        this.lPasswordError = "Please Input Your Password";
         return;
       }
 
@@ -217,20 +212,16 @@ __webpack_require__.r(__webpack_exports__);
 
       var _this = this;
 
-      axios.post(SITE_URL + '/auth/login', {
+      axios.post(this.base_url + '/auth/login', {
         email: this.lEmail,
-        password: this.lPassowrd,
+        password: this.lPassword,
         remember: re
       }).then(function (response) {
         _this.ajaxing = false;
 
-        if (response.data && response.data.jwt) {
-          //Success!
-          //Save token to Local Storage
-          localStorage.setItem('user', JSON.stringify(response.data)); //refresh the page
-          //TODO DON'T REFRESH, or they will lose current NPC data, what to do?
-
-          window.location.reload();
+        if (response.data.success) {
+          //Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
+          _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('postLogin');
         } else {
           _this.loginError = "An error occurred. Please try again.";
         }
@@ -246,29 +237,29 @@ __webpack_require__.r(__webpack_exports__);
     },
     register: function register() {
       this.registerError = '';
-      this.loginError = '';
-      this.emailError = '';
-      this.passwordError = '';
+      this.rUsernameError = '';
+      this.rEmailError = '';
+      this.rPasswordError = '';
 
       if (!this.rEmail.length) {
-        this.emailError = "Please Input Your Email";
+        this.rEmailError = "Please Input Your Email";
       } else if (this.rEmail.indexOf('@') === -1 || this.rEmail.indexOf('.') === -1) {
-        this.emailError = "Please Input a Valid Email";
+        this.rEmailError = "Please Input a Valid Email";
       }
 
       if (!this.rUsername.length) {
-        this.usernameError = "Please Input Your Username";
+        this.rUsernameError = "Please Input Your Username";
       }
 
       if (this.rPassword.length < 6) {
-        this.passwordError = "Please Input Your Password (Min 6 Characters)";
+        this.rPasswordError = "Please Input Your Password (Min 6 Characters)";
       }
 
       if (this.rPassword !== this.rPassword2) {
-        this.passwordError = "Your Passwords Do Not Match";
+        this.rPasswordError = "Your Passwords Do Not Match";
       }
 
-      if (this.emailError.length || this.usernameError.length || this.passwordError.length) {
+      if (this.rEmailError.length || this.rUsernameError.length || this.rPasswordError.length) {
         return;
       }
 
@@ -277,7 +268,7 @@ __webpack_require__.r(__webpack_exports__);
 
       var _this = this;
 
-      axios.post(SITE_URL + "/auth/register", {
+      axios.post(this.base_url + "/auth/register", {
         email: this.rEmail,
         username: this.rUsername,
         password: this.rPassword,
@@ -285,12 +276,9 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         _this.ajaxing = false;
 
-        if (response.data) {
-          //Success!
-          //Save token and user data to Local Storage
-          localStorage.setItem('user', JSON.stringify(response.data)); //refresh the page
-
-          window.location.reload();
+        if (response.data.success) {
+          //Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
+          _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('postRegister');
         } else {
           _this.registerError = "An error occurred. Please try again.";
         }
@@ -1887,6 +1875,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _NPC_GEN_DATA_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./NPC_GEN_DATA.vue */ "./resources/js/components/npcs/NPC_GEN_DATA.vue");
+/* harmony import */ var _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../eventbus/EventBus.js */ "./resources/js/components/eventbus/EventBus.js");
 //
 //
 //
@@ -1909,6 +1898,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {
@@ -1946,7 +1936,24 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
-    this.randomize();
+    var _this = this;
+
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_1__["EventBus"].$on('postLogin', function () {
+      localStorage.setItem("flashNPC", JSON.stringify(_this.npc));
+      window.location.reload();
+    });
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_1__["EventBus"].$on('postRegister', function () {
+      localStorage.setItem("flashNPC", JSON.stringify(_this.npc));
+      window.location.reload();
+    });
+    var flashNPC = localStorage.getItem("flashNPC");
+
+    if (flashNPC !== null) {
+      this.npc = JSON.parse(flashNPC);
+      localStorage.removeItem("flashNPC");
+    } else {
+      this.randomize();
+    }
   },
   methods: {
     randomize: function randomize() {
@@ -3038,41 +3045,89 @@ var render = function() {
                 _vm._v(" "),
                 _c("form", [
                   _c("div", {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.lEmailError.length,
+                        expression: "lEmailError.length"
+                      }
+                    ],
                     staticClass: "error-field",
-                    staticStyle: { display: "none" },
-                    attrs: { id: "login-email-error" }
+                    attrs: { id: "login-email-error" },
+                    domProps: { innerHTML: _vm._s(_vm.lEmailError) }
                   }),
                   _vm._v(" "),
                   _c("div", { staticClass: "field" }, [
                     _c("div", { staticClass: "control" }, [
                       _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.lEmail,
+                            expression: "lEmail"
+                          }
+                        ],
                         staticClass: "input is-large",
                         attrs: {
                           id: "login-email",
                           type: "email",
                           placeholder: "Email",
-                          autofocus: "",
-                          model: _vm.lEmail
+                          autofocus: ""
+                        },
+                        domProps: { value: _vm.lEmail },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.lEmail = $event.target.value
+                          }
                         }
                       })
                     ])
                   ]),
                   _vm._v(" "),
                   _c("div", {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.lPasswordError.length,
+                        expression: "lPasswordError.length"
+                      }
+                    ],
                     staticClass: "error-field",
-                    staticStyle: { display: "none" },
-                    attrs: { id: "login-password-error" }
+                    attrs: { id: "login-password-error" },
+                    domProps: { innerHTML: _vm._s(_vm.lPasswordError) }
                   }),
                   _vm._v(" "),
                   _c("div", { staticClass: "field" }, [
                     _c("div", { staticClass: "control" }, [
                       _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.lPassword,
+                            expression: "lPassword"
+                          }
+                        ],
                         staticClass: "input is-large",
                         attrs: {
                           id: "login-password",
                           type: "password",
-                          placeholder: "Password",
-                          model: _vm.lPassword
+                          placeholder: "Password"
+                        },
+                        domProps: { value: _vm.lPassword },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.lPassword = $event.target.value
+                          }
                         }
                       })
                     ])
@@ -3080,22 +3135,19 @@ var render = function() {
                   _vm._v(" "),
                   _vm._m(1),
                   _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      directives: [
-                        {
-                          name: "show",
-                          rawName: "v-show",
-                          value: _vm.loginError.length,
-                          expression: "loginError.length"
-                        }
-                      ],
-                      staticClass: "error-field",
-                      attrs: { id: "login-error" }
-                    },
-                    [_vm._v(_vm._s(_vm.loginError))]
-                  ),
+                  _c("div", {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.loginError.length,
+                        expression: "loginError.length"
+                      }
+                    ],
+                    staticClass: "error-field",
+                    attrs: { id: "login-error" },
+                    domProps: { innerHTML: _vm._s(_vm.loginError) }
+                  }),
                   _vm._v(" "),
                   _c(
                     "div",
@@ -3103,7 +3155,7 @@ var render = function() {
                       staticClass:
                         "button is-block is-info is-large is-fullwidth",
                       class: { busy: _vm.ajaxing },
-                      attrs: { id: "login-btn" },
+                      attrs: { id: "login-btn2" },
                       on: {
                         click: function($event) {
                           return _vm.login()
@@ -3167,61 +3219,133 @@ var render = function() {
                 _vm._v(" "),
                 _c("form", [
                   _c("div", {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.rUsernameError.length,
+                        expression: "rUsernameError.length"
+                      }
+                    ],
                     staticClass: "error-field",
-                    staticStyle: { display: "none" },
-                    attrs: { id: "register-username-error" }
+                    attrs: { id: "register-username-error" },
+                    domProps: { innerHTML: _vm._s(_vm.rUsernameError) }
                   }),
                   _vm._v(" "),
                   _c("div", { staticClass: "field" }, [
                     _c("div", { staticClass: "control" }, [
                       _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rUsername,
+                            expression: "rUsername"
+                          }
+                        ],
                         staticClass: "input is-large",
                         attrs: {
                           id: "register-username",
                           type: "text",
                           placeholder: "Username",
-                          autofocus: "",
-                          model: _vm.rUsername
+                          autofocus: ""
+                        },
+                        domProps: { value: _vm.rUsername },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.rUsername = $event.target.value
+                          }
                         }
                       })
                     ])
                   ]),
                   _vm._v(" "),
                   _c("div", {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.rEmailError.length,
+                        expression: "rEmailError.length"
+                      }
+                    ],
                     staticClass: "error-field",
-                    staticStyle: { display: "none" },
-                    attrs: { id: "register-email-error" }
+                    attrs: { id: "register-email-error" },
+                    domProps: { innerHTML: _vm._s(_vm.rEmailError) }
                   }),
                   _vm._v(" "),
                   _c("div", { staticClass: "field" }, [
                     _c("div", { staticClass: "control" }, [
                       _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rEmail,
+                            expression: "rEmail"
+                          }
+                        ],
                         staticClass: "input is-large",
                         attrs: {
                           id: "register-email",
                           type: "email",
-                          placeholder: "Email",
-                          model: _vm.rEmail
+                          placeholder: "Email"
+                        },
+                        domProps: { value: _vm.rEmail },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.rEmail = $event.target.value
+                          }
                         }
                       })
                     ])
                   ]),
                   _vm._v(" "),
                   _c("div", {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.rPasswordError.length,
+                        expression: "rPasswordError.length"
+                      }
+                    ],
                     staticClass: "error-field",
-                    staticStyle: { display: "none" },
-                    attrs: { id: "register-password-error" }
+                    attrs: { id: "register-password-error" },
+                    domProps: { innerHTML: _vm._s(_vm.rPasswordError) }
                   }),
                   _vm._v(" "),
                   _c("div", { staticClass: "field" }, [
                     _c("div", { staticClass: "control" }, [
                       _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rPassword,
+                            expression: "rPassword"
+                          }
+                        ],
                         staticClass: "input is-large",
                         attrs: {
                           id: "register-password",
                           type: "password",
-                          placeholder: "Password",
-                          model: _vm.rPassword
+                          placeholder: "Password"
+                        },
+                        domProps: { value: _vm.rPassword },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.rPassword = $event.target.value
+                          }
                         }
                       })
                     ])
@@ -3230,12 +3354,28 @@ var render = function() {
                   _c("div", { staticClass: "field" }, [
                     _c("div", { staticClass: "control" }, [
                       _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.rPassword2,
+                            expression: "rPassword2"
+                          }
+                        ],
                         staticClass: "input is-large",
                         attrs: {
                           id: "register-password-confirm",
                           type: "password",
-                          placeholder: "Confirm Password",
-                          model: _vm.rPassword2
+                          placeholder: "Confirm Password"
+                        },
+                        domProps: { value: _vm.rPassword2 },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.rPassword2 = $event.target.value
+                          }
                         }
                       })
                     ])
@@ -3244,9 +3384,17 @@ var render = function() {
                   _vm._m(4),
                   _vm._v(" "),
                   _c("div", {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.registerError.length,
+                        expression: "registerError.length"
+                      }
+                    ],
                     staticClass: "error-field",
-                    staticStyle: { display: "none" },
-                    attrs: { id: "register-error" }
+                    attrs: { id: "register-error" },
+                    domProps: { innerHTML: _vm._s(_vm.registerError) }
                   }),
                   _vm._v(" "),
                   _c(

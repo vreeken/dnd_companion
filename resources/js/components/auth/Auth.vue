@@ -12,17 +12,17 @@
 							<img src="/img/dnd_companion_logo.svg" onerror="this.onerror=null; this.src='/img/dnd_companion_logo.png'">
 						</figure>
 						<form>
-							<div class="error-field" id="login-email-error" style="display: none;"></div>
+							<div class="error-field" id="login-email-error" v-show="lEmailError.length" v-html="lEmailError"></div>
 							<div class="field">
 								<div class="control">
-									<input id="login-email" class="input is-large" type="email" placeholder="Email" autofocus="" :model="lEmail">
+									<input id="login-email" class="input is-large" type="email" placeholder="Email" autofocus="" v-model="lEmail">
 								</div>
 							</div>
 
-							<div class="error-field" id="login-password-error" style="display: none;"></div>
+							<div class="error-field" id="login-password-error" v-show="lPasswordError.length" v-html="lPasswordError"></div>
 							<div class="field">
 								<div class="control">
-									<input id="login-password" class="input is-large" type="password" placeholder="Password" :model="lPassword">
+									<input id="login-password" class="input is-large" type="password" placeholder="Password" v-model="lPassword">
 								</div>
 							</div>
 							<div class="field">
@@ -31,8 +31,8 @@
 									Remember me
 								</label>
 							</div>
-							<div class="error-field" id="login-error" v-show="loginError.length">{{loginError}}</div>
-							<div id="login-btn" class="button is-block is-info is-large is-fullwidth" @click="login()" :class="{'busy': ajaxing}">
+							<div class="error-field" id="login-error" v-show="loginError.length" v-html="loginError"></div>
+							<div id="login-btn2" class="button is-block is-info is-large is-fullwidth" @click="login()" :class="{'busy': ajaxing}">
 								<div class="btn-normal-div">Login</div>
 								<div class="btn-busy-div spinner">
 									<div class="bounce1"></div>
@@ -57,29 +57,29 @@
 							<img src="/img/dnd_companion_logo.svg" onerror="this.onerror=null; this.src='/img/dnd_companion_logo.png'">
 						</figure>
 						<form>
-							<div class="error-field" id="register-username-error" style="display: none;"></div>
+							<div class="error-field" id="register-username-error" v-show="rUsernameError.length" v-html="rUsernameError"></div>
 							<div class="field">
 								<div class="control">
-									<input id="register-username" class="input is-large" type="text" placeholder="Username" autofocus="" :model="rUsername">
+									<input id="register-username" class="input is-large" type="text" placeholder="Username" autofocus="" v-model="rUsername">
 								</div>
 							</div>
 
-							<div class="error-field" id="register-email-error" style="display: none;"></div>
+							<div class="error-field" id="register-email-error" v-show="rEmailError.length" v-html="rEmailError"></div>
 							<div class="field">
 								<div class="control">
-									<input id="register-email" class="input is-large" type="email" placeholder="Email" :model="rEmail">
+									<input id="register-email" class="input is-large" type="email" placeholder="Email" v-model="rEmail">
 								</div>
 							</div>
 
-							<div class="error-field" id="register-password-error" style="display: none;"></div>
+							<div class="error-field" id="register-password-error" v-show="rPasswordError.length" v-html="rPasswordError"></div>
 							<div class="field">
 								<div class="control">
-									<input id="register-password" class="input is-large" type="password" placeholder="Password" :model="rPassword">
+									<input id="register-password" class="input is-large" type="password" placeholder="Password" v-model="rPassword">
 								</div>
 							</div>
 							<div class="field">
 								<div class="control">
-									<input id="register-password-confirm" class="input is-large" type="password" placeholder="Confirm Password" :model="rPassword2">
+									<input id="register-password-confirm" class="input is-large" type="password" placeholder="Confirm Password" v-model="rPassword2">
 								</div>
 							</div>
 							<div class="field">
@@ -88,7 +88,7 @@
 									Remember me
 								</label>
 							</div>
-							<div class="error-field" id="register-error" style="display: none;"></div>
+							<div class="error-field" id="register-error" v-show="registerError.length" v-html="registerError"></div>
 							<div id="register-btn" class="button is-block is-info is-large is-fullwidth" @click="register()" :class="{'busy': ajaxing}">
 								<div class="btn-normal-div">Create Account</div>
 								<div class="btn-busy-div spinner">
@@ -126,8 +126,11 @@ export default {
 			activeTab: 'l',
 			ajaxing: false,
 			loginError: '',
-			emailError: '',
-			passwordError: '',
+			lEmailError: '',
+			lPasswordError: '',
+			rEmailError: '',
+			rPasswordError: '',
+			rUsernameError: '',
 			registerError: '',
 			rUsername: '',
 			rEmail: '',
@@ -135,6 +138,7 @@ export default {
 			rPassword2: '',
 			lEmail: '',
 			lPassword: '',
+			base_url: window.location.origin
 		}
 	},
 	mounted: function() {
@@ -151,15 +155,7 @@ export default {
 				_this.showRegisterModal();
 			});
 		}
-		if (document.getElementById("nav-logout")) {
-			document.getElementById("nav-logout").addEventListener('click', function(event) {
-				event.preventDefault();
-				localStorage.clear();
-				//TODO doesn't work?
-				document.getElementById('frm-logout').submit();
-			});
-		}
-
+		
 		EventBus.$on('showLogin', function(title) {
 			_this.showLoginModal(title);
 		});
@@ -185,16 +181,16 @@ export default {
 		},
 		login: function() {
 			this.loginError = '';
-			this.emailError = '';
-			this.passwordError = '';
+			this.lEmailError = '';
+			this.lPasswordError = '';
 
 			if (!this.lEmail.length) {
-				this.emailError = "Please Input Your Email";
+				this.lEmailError = "Please Input Your Email";
 				return;
 			}
 
-			if (!this.lPassowrd.length) {
-				this.passwordError = "Please Input Your Password";
+			if (!this.lPassword.length) {
+				this.lPasswordError = "Please Input Your Password";
 				return;
 			}
 
@@ -202,19 +198,15 @@ export default {
 			this.ajaxing=true;
 			const _this=this;
 
-			axios.post(SITE_URL+'/auth/login', {
+			axios.post(this.base_url+'/auth/login', {
 				email: this.lEmail,
-				password: this.lPassowrd,
+				password: this.lPassword,
 				remember: re
 			}).then(function(response) {
 				_this.ajaxing=false;
-				if (response.data && response.data.jwt) {
-					//Success!
-					//Save token to Local Storage
-					localStorage.setItem('user', JSON.stringify(response.data));
-					//refresh the page
-					//TODO DON'T REFRESH, or they will lose current NPC data, what to do?
-					window.location.reload();
+				if (response.data.success) {
+					//Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
+					EventBus.$emit('postLogin');
 				}
 				else {
 					_this.loginError = "An error occurred. Please try again.";
@@ -231,29 +223,29 @@ export default {
 		},
 		register: function() {
 			this.registerError = '';
-			this.loginError = '';
-			this.emailError = '';
-			this.passwordError = '';
+			this.rUsernameError = '';
+			this.rEmailError = '';
+			this.rPasswordError = '';
 
 			if (!this.rEmail.length) {
-				this.emailError = "Please Input Your Email";
+				this.rEmailError = "Please Input Your Email";
 			}
 			else if (this.rEmail.indexOf('@') === -1 || this.rEmail.indexOf('.') === -1) {
-				this.emailError = "Please Input a Valid Email";
+				this.rEmailError = "Please Input a Valid Email";
 			}
 			
 			if (!this.rUsername.length) {
-				this.usernameError = "Please Input Your Username";
+				this.rUsernameError = "Please Input Your Username";
 			}
 			if (this.rPassword.length < 6) {
-				this.passwordError = "Please Input Your Password (Min 6 Characters)";
+				this.rPasswordError = "Please Input Your Password (Min 6 Characters)";
 			}
 
 			if (this.rPassword !== this.rPassword2) {
-				this.passwordError = "Your Passwords Do Not Match";
+				this.rPasswordError = "Your Passwords Do Not Match";
 			}
 
-			if (this.emailError.length || this.usernameError.length || this.passwordError.length) {
+			if (this.rEmailError.length || this.rUsernameError.length || this.rPasswordError.length) {
 				return;
 			}
 
@@ -262,19 +254,16 @@ export default {
 			this.ajaxing=true;
 			const _this=this;
 
-			axios.post(SITE_URL+"/auth/register", {
+			axios.post(this.base_url+"/auth/register", {
 				email: this.rEmail,
 				username: this.rUsername,
 				password: this.rPassword,
 				remember: re
 			}).then(function(response) {
 				_this.ajaxing=false;
-				if (response.data) {
-					//Success!
-					//Save token and user data to Local Storage
-					localStorage.setItem('user', JSON.stringify(response.data));
-					//refresh the page
-					window.location.reload();
+				if (response.data.success) {
+					//Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
+					EventBus.$emit('postRegister');
 				}
 				else {
 					_this.registerError = "An error occurred. Please try again.";

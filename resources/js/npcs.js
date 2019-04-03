@@ -17,7 +17,6 @@ Vue.component('public-npcs', require('./components/npcs/Public_Npcs.vue').defaul
 //Vue.component('npc-public-listview', require('./components/npcs/Npc_Public_Listview.vue').default);
 Vue.component('npc-public-fullview', require('./components/npcs/Npc_Public_Fullview.vue').default);
 
-
 const app = new Vue({
 	el: '#app'
 });

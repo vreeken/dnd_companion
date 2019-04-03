@@ -78,14 +78,17 @@ class JwtAuthController extends Controller {
 		$remember = ($request->has('remember') && $request->input('remember')==true);
 		Auth::login($user, $remember);
 
+		/*
 		try {
 			$token = JWTAuth::fromUser($user);
 		}
 		catch(Exception $e) {
 			return response()->json(['success'=>'account_created', 'id'=>$user->id, 'username'=>$user->username, 'email'=>$user->email, 'account_status'=>$user->account_status]);
 		}
+		*/
 		
-		return response()->json(['success'=>'account_created', 'jwt'=>$token, 'id'=>$user->id, 'username'=>$user->username, 'email'=>$user->email, 'account_status'=>$user->account_status]);
+		//return response()->json(['success'=>'account_created', 'jwt'=>$token, 'id'=>$user->id, 'username'=>$user->username, 'email'=>$user->email, 'account_status'=>$user->account_status]);
+		return response()->json(['success'=>'account_created']);
 	}
 
 	//Mobile registration, the only difference is that we don't session log them in
@@ -292,6 +295,7 @@ class JwtAuthController extends Controller {
 		$user = Auth::User();
 
 		//Also get a jwt for api calls
+		/*
 		try {
 			// verify the credentials and create a token for the user
 			if (! $token = JWTAuth::attempt($credentials)) {
@@ -301,10 +305,12 @@ class JwtAuthController extends Controller {
 			// something went wrong
 			return response()->json(['error'=>'could_not_create_token'], 500);
 		}
-		
 
 		// if no errors are encountered we can return a JWT
 		return response()->json(['jwt'=>$token, 'id'=>$user->id, 'username'=>$user->username, 'email'=>$user->email, 'account_status'=>$user->account_status]);
+		*/
+		
+		return response()->json(['success'=>'success']);
 	}
 
 	public function confirm(Request $request) {
