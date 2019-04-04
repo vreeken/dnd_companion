@@ -204,7 +204,8 @@ export default {
 				remember: re
 			}).then(function(response) {
 				_this.ajaxing=false;
-				if (response.data.success) {
+				if (response.data.jwt) {
+					localStorage.setItem('jwt', response.data.jwt);
 					//Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
 					EventBus.$emit('postLogin');
 				}
@@ -261,7 +262,8 @@ export default {
 				remember: re
 			}).then(function(response) {
 				_this.ajaxing=false;
-				if (response.data.success) {
+				if (response.data.jwt) {
+					localStorage.setItem('jwt', response.data.jwt);
 					//Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
 					EventBus.$emit('postRegister');
 				}
