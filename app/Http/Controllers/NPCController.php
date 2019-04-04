@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\NPC;
 
 use App\Traits\UserAndOptionsUtils;
-
+use Auth;
 
 class NPCController extends Controller {
 
@@ -43,6 +43,10 @@ class NPCController extends Controller {
 
     public function createNPC(Request $request): \Illuminate\Http\JsonResponse {
         return NPC::createNPC($request);
+    }
+
+    public function updateNPC(Request $request): \Illuminate\Http\JsonResponse {
+        return NPC::updateNPC($request);
     }
 
     public function getPublicNPCs(Request $request): \Illuminate\Http\JsonResponse {

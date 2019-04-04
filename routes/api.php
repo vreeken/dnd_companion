@@ -44,7 +44,7 @@ Route::post('comments/get',					'MainController@getComments');
 Route::post('report',						'MainController@report');
 
 Route::group(['middleware' => 'jwt.auth'], function () {
-
+	
 	Route::get('admin/check-token', 		'AdminController@jwtCheck');
 
 	Route::post('hooks/new', 				'HookController@submitPost');
@@ -55,6 +55,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
 	Route::post('dungeons/new', 			'DungeonController@submitPost');
 
     Route::post('npcs/new', 		    	'NPCController@createNPC');
+    Route::post('npcs/update', 		    	'NPCController@updateNPC');
 
 	Route::post('vote',						'MainController@vote');
 	
