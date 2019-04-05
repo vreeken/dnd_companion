@@ -7,8 +7,6 @@
 
 require('./bootstrap');
 
-
-
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -63,6 +61,27 @@ Vue.component('map-newpost', require('./components/maps/MapNewpost.vue').default
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+
+
 const app = new Vue({
 	el: '#app'
+});
+
+// before a request is made start vue-progressbar
+axios.interceptors.request.use(config => {
+	app.$Progress.start(5000);
+	return config;
+});
+
+// before a response is returned stop vue-progressbar
+axios.interceptors.response.use(response => {
+	if (response.status !== 200) {
+		console.log('ajax fail');
+		app.$Progress.fail();
+	}
+	else {
+		console.log('end ajax');
+		app.$Progress.finish();
+	}
+	return response;
 });

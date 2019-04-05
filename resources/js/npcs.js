@@ -1,9 +1,5 @@
 require('./bootstrap');
 
-window.Vue = require('vue');
-
-Vue.config.productionTip = false;
-
 Vue.component('auth', require('./components/auth/Auth.vue').default);
 
 Vue.component('npcs', require('./components/npcs/Npcs.vue').default);
@@ -19,4 +15,25 @@ Vue.component('npc-public-fullview', require('./components/npcs/Npc_Public_Fullv
 
 const app = new Vue({
 	el: '#app'
+});
+
+window.app = app;
+
+// before a request is made start vue-progressbar
+axios.interceptors.request.use(config => {
+	app.$Progress.start(3000);
+	return config;
+});
+
+// before a response is returned stop vue-progressbar
+axios.interceptors.response.use(response => {
+	if (response.status !== 200) {
+		console.log('ajax fail');
+		app.$Progress.fail();
+	}
+	else {
+		console.log('end ajax');
+		app.$Progress.finish();
+	}
+	return response;
 });
