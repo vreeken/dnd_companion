@@ -10,7 +10,17 @@ html,body {
 	width: 100%;
 }
 */
-
+.toasted-icon {
+	font-size: 3em !important;
+	position: relative;
+	right: -10px;
+	color: rgba(0,0,0,.5) !important;
+}
+.toasted-icon:hover {
+	text-decoration: none !important;
+	cursor: pointer;
+	color: rgba(0,0,0,.8) !important;
+}
 #app {
 	flex: 1;
 	display: flex;
