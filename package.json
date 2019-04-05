@@ -30,6 +30,8 @@
   "main": "resources/js/app.js",
   "dependencies": {
     "browserify-zlib": "^0.2.0",
-    "json5": "^2.1.0"
+    "json5": "^2.1.0",
+    "vue-progressbar": "^0.7.5",
+    "vue-toasted": "^1.1.26"
   }
 }
