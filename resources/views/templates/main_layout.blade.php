@@ -65,7 +65,7 @@
 				</div>
 
 				@include('templates.partials.footer')
-				
+				<vue-progress-bar></vue-progress-bar>
 		</div>
 		{{-- Scripts --}}
 		<script src="{{ asset('/js/common.js') }}"></script>
