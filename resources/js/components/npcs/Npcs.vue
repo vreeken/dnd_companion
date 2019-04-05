@@ -15,7 +15,7 @@
 		</div>
 		<div id="npc-tab-content">
 			<div v-show="activeTab==='gen'">
-				<npc-generator ref="tab_gen" :data="data" @onSaveNPCToMine="saveNPCToMine()" />
+				<npc-generator ref="tab_gen" :data="data" @onSaveNPCToMine="saveNPCToMine" />
 			</div>
 			<div v-show="activeTab==='mine'">
 				<my-npcs v-if="LOGGED_IN" ref="tab_mine" :data="data" />

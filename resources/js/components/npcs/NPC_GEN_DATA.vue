@@ -179,8 +179,8 @@ export default{
 		},
 
 		getClass: function(npc) {
-			npc.class_int=this.getRandomNumber(this.CLASSES.length);
-			npc.class = this.CLASSES[npc.class_int];
+			npc.class_id=this.getRandomNumber(this.CLASSES.length);
+			npc.class = this.CLASSES[npc.class_id];
 			npc.class_other=null;
 		},
 		getAge: function(npc) {
@@ -588,25 +588,25 @@ export default{
 			const npc = {};
 			npc.name=n.name;
 
-			if (n.class_other===null) {
-				npc.class_int = n.class;
-				npc.class = this.CLASSES[n.class];
-				npc.class_other = null;
-			}
-			else {
-				npc.class=null;
+			if (n.class_id===null) {
+				npc.class=n.class_other;
 				npc.class_other=n.class_other;
 			}
+			else {
+				npc.class_id = n.class_id;
+				npc.class = this.CLASSES[n.class_id];
+				npc.class_other = null;
+			}
 
-			if (n.race_other===null) {
-				npc.race_int = n.race;
-				npc.race = this.gen_races["races-all"][n.race];
-				npc.race_other = null;
-				npc.race_raw = this.getRace(n.race_int);
+			if (n.race_id===null) {
+				npc.race=n.race_other;
+				npc.race_other=n.race_other;
 			}
 			else {
-				npc.race=null;
-				npc.race_other=n.race_other;
+				npc.race_id = n.race_id;
+				npc.race = this.gen_races["races-all"][n.race_id];
+				npc.race_other = null;
+				npc.race_raw = this.getRace(n.race_id);
 			}
 
 			npc.age_int = n.age;
