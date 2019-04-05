@@ -3642,25 +3642,27 @@ var render = function() {
         [
           _c(
             "div",
-            { staticClass: "column is-three-quarters" },
-            [_c("npc-view", { attrs: { npc: _vm.curr_npc } })],
+            { staticClass: "column is-half" },
+            [
+              _c(
+                "button",
+                {
+                  staticClass: "button is-danger is-fullwidth",
+                  on: {
+                    click: function($event) {
+                      _vm.editing = true
+                    }
+                  }
+                },
+                [_vm._m(0), _vm._v("Edit\n\t\t\t")]
+              ),
+              _vm._v(" "),
+              _c("npc-view", { attrs: { npc: _vm.curr_npc } })
+            ],
             1
           ),
           _vm._v(" "),
           _c("div", { staticClass: "column" }, [
-            _c(
-              "button",
-              {
-                staticClass: "button is-danger is-fullwidth",
-                on: {
-                  click: function($event) {
-                    _vm.editing = true
-                  }
-                }
-              },
-              [_vm._m(0), _vm._v("Edit\n\t\t\t")]
-            ),
-            _vm._v(" "),
             _c(
               "div",
               { staticClass: "npc-list" },

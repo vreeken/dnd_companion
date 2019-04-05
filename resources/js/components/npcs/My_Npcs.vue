@@ -1,13 +1,13 @@
 <template>
 	<div class="npcs-mine">
 		<div v-show="!editing" class="columns">
-			<div class="column is-three-quarters">
-				<npc-view :npc="curr_npc" />
-			</div>
-			<div class="column">
+			<div class="column is-half">
 				<button class="button is-danger is-fullwidth" @click="editing=true">
 					<span class="icon"><i class="fas fa-edit" /></span>Edit
 				</button>
+				<npc-view :npc="curr_npc" />
+			</div>
+			<div class="column">
 				<div class="npc-list">
 					<div v-for="(npc, i) in my_npcs" :key="i" class="button" @click="showNPC(npc, i)">
 						{{ npc.summary }}

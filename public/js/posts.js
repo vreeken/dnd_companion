@@ -6804,25 +6804,85 @@ module.exports = g;
 /*!***********************************!*\
   !*** ./resources/js/bootstrap.js ***!
   \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue_progressbar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-progressbar */ "./node_modules/vue-progressbar/dist/vue-progressbar.js");
+/* harmony import */ var vue_progressbar__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_progressbar__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_1__);
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
-Vue.config.productionTip = false;
-/**
- * We'll load the axios HTTP library which allows us to easily issue requests
- * to our Laravel back-end. This library automatically handles sending the
- * CSRF token as a header based on the value of the "XSRF" token cookie.
- */
+Vue.config.productionTip = false; // Ajax loading bar, MUST BE initialized with axios within each base .js file (eg posts.js and npcs.js)
 
+
+var options = {
+  color: '#3082ed',
+  failedColor: '#ff0000',
+  thickness: '10px',
+  transition: {
+    speed: '0.2s',
+    opacity: '0.6s',
+    termination: 500
+  },
+  autoRevert: true,
+  location: 'bottom',
+  inverse: false,
+  autoFinish: false
+};
+Vue.use(vue_progressbar__WEBPACK_IMPORTED_MODULE_0___default.a, options);
+
+Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_1___default.a);
+Vue.toasted.register('success', function (data) {
+  if (data.message) {
+    return data.message;
+  }
+
+  return 'Success';
+}, {
+  type: 'success',
+  icon: {
+    name: 'fa-check'
+  },
+  position: 'bottom-center',
+  duration: '4000',
+  iconPack: 'fontawesome',
+  closeOnSwipe: true,
+  action: {
+    text: '×',
+    class: 'toasted-icon',
+    onClick: function onClick(e, toastObject) {
+      toastObject.goAway(0);
+    }
+  }
+});
+Vue.toasted.register('error', function (data) {
+  if (data.message) {
+    return data.message;
+  }
+
+  return 'An error occurred. Please try again.';
+}, {
+  type: 'error',
+  icon: {
+    name: 'fa-exclamation-circle'
+  },
+  position: 'bottom-center',
+  duration: '4000',
+  iconPack: 'fontawesome',
+  closeOnSwipe: true,
+  action: {
+    text: '×',
+    class: 'toasted-icon',
+    onClick: function onClick(e, toastObject) {
+      toastObject.goAway(0);
+    }
+  }
+});
 window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-window.axios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('jwt');
-/**
- * Next we will register the CSRF Token as a common header with Axios so that
- * all outgoing HTTP requests automatically have it attached. This is just
- * a simple convenience so we don't have to attach every token manually.
- */
+window.axios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('jwt'); // Grab the csrf token from html document head and include with all axios requests
 
 var token = document.head.querySelector('meta[name="csrf-token"]');
 
@@ -8718,6 +8778,23 @@ Vue.component('map-newpost', __webpack_require__(/*! ./components/maps/MapNewpos
 
 var app = new Vue({
   el: '#app'
+}); // before a request is made start vue-progressbar
+
+axios.interceptors.request.use(function (config) {
+  app.$Progress.start(5000);
+  return config;
+}); // before a response is returned stop vue-progressbar
+
+axios.interceptors.response.use(function (response) {
+  if (response.status !== 200) {
+    console.log('ajax fail');
+    app.$Progress.fail();
+  } else {
+    console.log('end ajax');
+    app.$Progress.finish();
+  }
+
+  return response;
 });
 
 /***/ }),
