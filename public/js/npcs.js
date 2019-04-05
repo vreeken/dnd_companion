@@ -219,8 +219,9 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         _this.ajaxing = false;
 
-        if (response.data.success) {
-          //Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
+        if (response.data.jwt) {
+          localStorage.setItem('jwt', response.data.jwt); //Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
+
           _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('postLogin');
         } else {
           _this.loginError = "An error occurred. Please try again.";
@@ -276,8 +277,9 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         _this.ajaxing = false;
 
-        if (response.data.success) {
-          //Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
+        if (response.data.jwt) {
+          localStorage.setItem('jwt', response.data.jwt); //Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
+
           _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('postRegister');
         } else {
           _this.registerError = "An error occurred. Please try again.";
@@ -382,6 +384,7 @@ __webpack_require__.r(__webpack_exports__);
     return {
       my_npcs: [],
       curr_npc: null,
+      curr_npc_index: 0,
       editing: false
     };
   },
@@ -391,44 +394,103 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     parseNPCsFromServer: function parseNPCsFromServer() {
       if (this.data.my_npcs.length) {
-        for (var i = 0; i < this.data.my_npcs.length; i++) {
-          this.my_npcs.push(this.parseNPCFromServerData(this.data.my_npcs[i]));
+        for (var _i = 0; _i < this.data.my_npcs.length; _i++) {
+          this.my_npcs.push(this.parseNPCFromServerData(this.data.my_npcs[_i]));
         }
       }
 
       this.curr_npc = this.my_npcs[0];
     },
     saveNewNPC: function saveNewNPC(npc) {
-      this.my_npcs.push(npc); //this.curr_npc = this.my_npcs[this.my_npcs.length-1];
-
+      this.checkNPCCustomInputs(npc);
+      this.my_npcs.push(npc);
       this.curr_npc = npc;
+      this.curr_npc_index = this.my_npcs.length - 1;
       this.saveNewNPCToDB(npc);
     },
-    showNPC: function showNPC(npc) {
+    showNPC: function showNPC(npc, i) {
+      this.curr_npc_index = i;
       this.curr_npc = npc;
     },
     saveNewNPCToDB: function saveNewNPCToDB(npc) {
+      var _this = this;
+
       axios.post(NEW_NPC_URL, {
         npc: npc
       }, config).then(function (response) {
-        if (response.data && response.data.success) {
-          console.log('saved to db');
+        if (response.data && response.data.success && response.data.id) {
+          _this.$toasted.global.success({
+            message: 'NPC Saved'
+          });
+
+          npc.id = response.data.id;
           return;
         } //TODO handle error
 
 
         console.log('error saving to db');
         console.log(response.data);
+
+        _this.$toasted.global.error();
+      }).catch(function (error) {
+        //TODO handle error
+        console.log('catch error');
+        console.log(error);
+        console.log(error.response);
+        console.log(error.response.data);
+
+        _this.$toasted.global.error();
+      });
+    },
+    saveChanges: function saveChanges(new_npc) {
+      this.curr_npc = new_npc;
+      this.my_npcs[i] = this.curr_npc;
+      this.editing = false;
+      this.checkNPCCustomInputs(this.npc);
+
+      var _this = this;
+
+      axios.post(UPDATE_NPC_URL, {
+        npc: this.npc
+      }, config).then(function (response) {
+        if (response.data && response.data.success) {
+          _this.$toasted.global.success({
+            message: 'NPC Updated'
+          });
+
+          return;
+        }
+
+        _this.$toasted.global.error();
       }).catch(function (error) {
         //TODO handle error
         console.log('catch error');
         console.log(error.response);
         console.log(error.response.data);
+
+        _this.$toasted.global.error();
       });
     },
-    saveChanges: function saveChanges(new_npc) {
-      this.npc = new_npc;
-      this.editing = false;
+    checkNPCCustomInputs: function checkNPCCustomInputs(npc) {
+      // Check if they have a custom class and/or race, if so set the int id to null and set *_other to the custom input
+      if (this.CLASSES.indexOf(npc.class) === -1) {
+        npc.class_id = null;
+        npc.class_other = npc.class;
+      }
+
+      var found = false;
+
+      for (var _i2 = 0; _i2 < this.RACES.length; _i2++) {
+        if (this.RACES[_i2].name.toLowerCase() === npc.race.toLowerCase()) {
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        npc.race_id = null;
+        npc.race_other = npc.race;
+      }
     }
   }
 });
@@ -752,8 +814,8 @@ var _json_npc_npc_voices_json__WEBPACK_IMPORTED_MODULE_24___namespace = /*#__PUR
       return npc;
     },
     getClass: function getClass(npc) {
-      npc.class_int = this.getRandomNumber(this.CLASSES.length);
-      npc.class = this.CLASSES[npc.class_int];
+      npc.class_id = this.getRandomNumber(this.CLASSES.length);
+      npc.class = this.CLASSES[npc.class_id];
       npc.class_other = null;
     },
     getAge: function getAge(npc) {
@@ -1186,23 +1248,23 @@ var _json_npc_npc_voices_json__WEBPACK_IMPORTED_MODULE_24___namespace = /*#__PUR
       var npc = {};
       npc.name = n.name;
 
-      if (n.class_other === null) {
-        npc.class_int = n.class;
-        npc.class = this.CLASSES[n.class];
-        npc.class_other = null;
-      } else {
-        npc.class = null;
+      if (n.class_id === null) {
+        npc.class = n.class_other;
         npc.class_other = n.class_other;
+      } else {
+        npc.class_id = n.class_id;
+        npc.class = this.CLASSES[n.class_id];
+        npc.class_other = null;
       }
 
-      if (n.race_other === null) {
-        npc.race_int = n.race;
-        npc.race = this.gen_races["races-all"][n.race];
-        npc.race_other = null;
-        npc.race_raw = this.getRace(n.race_int);
-      } else {
-        npc.race = null;
+      if (n.race_id === null) {
+        npc.race = n.race_other;
         npc.race_other = n.race_other;
+      } else {
+        npc.race_id = n.race_id;
+        npc.race = this.gen_races["races-all"][n.race_id];
+        npc.race_other = null;
+        npc.race_raw = this.getRace(n.race_id);
       }
 
       npc.age_int = n.age;
@@ -3602,15 +3664,15 @@ var render = function() {
             _c(
               "div",
               { staticClass: "npc-list" },
-              _vm._l(_vm.my_npcs, function(npc) {
+              _vm._l(_vm.my_npcs, function(npc, i) {
                 return _c(
                   "div",
                   {
-                    key: npc.id,
+                    key: i,
                     staticClass: "button",
                     on: {
                       click: function($event) {
-                        return _vm.showNPC(npc)
+                        return _vm.showNPC(npc, i)
                       }
                     }
                   },
@@ -6265,11 +6327,7 @@ var render = function() {
           _c("npc-generator", {
             ref: "tab_gen",
             attrs: { data: _vm.data },
-            on: {
-              onSaveNPCToMine: function($event) {
-                return _vm.saveNPCToMine()
-              }
-            }
+            on: { onSaveNPCToMine: _vm.saveNPCToMine }
           })
         ],
         1
@@ -6388,24 +6446,85 @@ module.exports = g;
 /*!***********************************!*\
   !*** ./resources/js/bootstrap.js ***!
   \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue_progressbar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-progressbar */ "./node_modules/vue-progressbar/dist/vue-progressbar.js");
+/* harmony import */ var vue_progressbar__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_progressbar__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_1__);
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
-Vue.config.productionTip = false;
-/**
- * We'll load the axios HTTP library which allows us to easily issue requests
- * to our Laravel back-end. This library automatically handles sending the
- * CSRF token as a header based on the value of the "XSRF" token cookie.
- */
+Vue.config.productionTip = false; // Ajax loading bar, MUST BE initialized with axios within each base .js file (eg posts.js and npcs.js)
 
+
+var options = {
+  color: '#3082ed',
+  failedColor: '#ff0000',
+  thickness: '10px',
+  transition: {
+    speed: '0.2s',
+    opacity: '0.6s',
+    termination: 500
+  },
+  autoRevert: true,
+  location: 'bottom',
+  inverse: false,
+  autoFinish: false
+};
+Vue.use(vue_progressbar__WEBPACK_IMPORTED_MODULE_0___default.a, options);
+
+Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_1___default.a);
+Vue.toasted.register('success', function (data) {
+  if (data.message) {
+    return data.message;
+  }
+
+  return 'Success';
+}, {
+  type: 'success',
+  icon: {
+    name: 'fa-check'
+  },
+  position: 'bottom-center',
+  duration: '4000',
+  iconPack: 'fontawesome',
+  closeOnSwipe: true,
+  action: {
+    text: '×',
+    class: 'toasted-icon',
+    onClick: function onClick(e, toastObject) {
+      toastObject.goAway(0);
+    }
+  }
+});
+Vue.toasted.register('error', function (data) {
+  if (data.message) {
+    return data.message;
+  }
+
+  return 'An error occurred. Please try again.';
+}, {
+  type: 'error',
+  icon: {
+    name: 'fa-exclamation-circle'
+  },
+  position: 'bottom-center',
+  duration: '4000',
+  iconPack: 'fontawesome',
+  closeOnSwipe: true,
+  action: {
+    text: '×',
+    class: 'toasted-icon',
+    onClick: function onClick(e, toastObject) {
+      toastObject.goAway(0);
+    }
+  }
+});
 window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-/**
- * Next we will register the CSRF Token as a common header with Axios so that
- * all outgoing HTTP requests automatically have it attached. This is just
- * a simple convenience so we don't have to attach every token manually.
- */
+window.axios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('jwt'); // Grab the csrf token from html document head and include with all axios requests
 
 var token = document.head.querySelector('meta[name="csrf-token"]');
 
@@ -7320,8 +7439,6 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
-window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
-Vue.config.productionTip = false;
 Vue.component('auth', __webpack_require__(/*! ./components/auth/Auth.vue */ "./resources/js/components/auth/Auth.vue").default);
 Vue.component('npcs', __webpack_require__(/*! ./components/npcs/Npcs.vue */ "./resources/js/components/npcs/Npcs.vue").default);
 Vue.component('npc-generator', __webpack_require__(/*! ./components/npcs/Npc_generator.vue */ "./resources/js/components/npcs/Npc_generator.vue").default);
@@ -7334,6 +7451,24 @@ Vue.component('public-npcs', __webpack_require__(/*! ./components/npcs/Public_Np
 Vue.component('npc-public-fullview', __webpack_require__(/*! ./components/npcs/Npc_Public_Fullview.vue */ "./resources/js/components/npcs/Npc_Public_Fullview.vue").default);
 var app = new Vue({
   el: '#app'
+});
+window.app = app; // before a request is made start vue-progressbar
+
+axios.interceptors.request.use(function (config) {
+  app.$Progress.start(3000);
+  return config;
+}); // before a response is returned stop vue-progressbar
+
+axios.interceptors.response.use(function (response) {
+  if (response.status !== 200) {
+    console.log('ajax fail');
+    app.$Progress.fail();
+  } else {
+    console.log('end ajax');
+    app.$Progress.finish();
+  }
+
+  return response;
 });
 
 /***/ }),
