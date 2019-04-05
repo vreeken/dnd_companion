@@ -43,6 +43,7 @@
 		 ****************************************/
 
 		const NEW_NPC_URL = '{{ url('api/npcs/new') }}';
+		const UPDATE_NPC_URL = '{{ url('api/npcs/update') }}';
         //const GET_MY_NPCS_URL = '{{ url('api/npcs/mine') }}';
         //const GET_NPCS_URL = '{{ url('api/npcs') }}';
         const GET_PUBLIC_NPCS_URL = '{{ url('api/npcs/public/get') }}';
