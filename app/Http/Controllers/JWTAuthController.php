@@ -314,7 +314,7 @@ class JwtAuthController extends Controller {
 				return response()->json(['error'=>'invalid_code'], 400);
 			}
 			else {
-				return "Invalid Code";
+				return view('auth.confirm', ['output'=>'Invalid Code']);
 			}
 		}
 
@@ -324,7 +324,7 @@ class JwtAuthController extends Controller {
 				return response()->json(['error'=>'invalid_code'], 400);
 			}
 			else {
-				return "Invalid Code";
+				return view('auth.confirm', ['output'=>'Invalid Code']);
 			}
 		}
 
@@ -336,7 +336,7 @@ class JwtAuthController extends Controller {
 				return response()->json(['error'=>'db_error'], 500);
 			}
 			else {
-				return "Database Error, please try again.";
+				return view('auth.confirm', ['output'=>'Database Error, please try again.']);
 			}
 		}
 
@@ -345,7 +345,7 @@ class JwtAuthController extends Controller {
 			return response()->json(['success'=>'account_verified', 'jwt'=>$token]);
 		}
 		else {
-			return "Account verified successfully. You may now log in.";
+			return view('auth.confirm', ['output'=>'success']);
 		}
 	}
 

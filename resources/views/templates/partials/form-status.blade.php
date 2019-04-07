@@ -33,7 +33,7 @@
   </div>
 @endif
 
-@if (count($errors) > 0)
+@if (isset($errors) && count($errors) > 0)
   <div class="alert alert-danger alert-dismissable fade in">
     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
     <h4>
