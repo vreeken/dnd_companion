@@ -17,10 +17,6 @@ html,body {
 }
 */
 
-*.column {
-  width: 0px;
-}
-
 .npc-list > .button {
   height: auto !important;
   white-space: normal !important;
