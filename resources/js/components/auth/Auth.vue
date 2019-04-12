@@ -1,114 +1,158 @@
 <template>
-	<div id="login__modal" class="modal" :class="{'is-active': showingModal}">
-		<div class="modal-background" @click="hideLoginModal()"></div>
-		<div class="modal-content">
-			<div class="has-text-centered login-container">
+	<div>
+		<nav class="navbar has-shadow">
+			<div class="navbar-brand">
+				<a class="navbar-item" :href="base_url + '/'"><img :src="base_url + '/img/dnd_companion_logo_simple.svg'" alt="DnD Companion" onerror="this.onerror=null; this.src=window.location.origin+'/img/dnd_companion_logo_small.png'"/></a>
 
-				<!--Login tab-->
-				<div id="login__modal__login" class="column login-tab" :class="{'active': activeTab==='l'}">
-					<div class="box">
-						<div class="modal__title" id="login-title">{{loginTitle}}</div>
-						<figure class="avatar">
-							<img src="/img/dnd_companion_logo.svg" onerror="this.onerror=null; this.src='/img/dnd_companion_logo.png'">
-						</figure>
-						<form>
-							<div class="error-field" id="login-email-error" v-show="lEmailError.length" v-html="lEmailError"></div>
-							<div class="field">
-								<div class="control">
-									<input id="login-email" class="input is-large" type="email" placeholder="Email" autofocus="" v-model="lEmail">
-								</div>
-							</div>
-
-							<div class="error-field" id="login-password-error" v-show="lPasswordError.length" v-html="lPasswordError"></div>
-							<div class="field">
-								<div class="control">
-									<input id="login-password" class="input is-large" type="password" placeholder="Password" v-model="lPassword">
-								</div>
-							</div>
-							<div class="field">
-								<label class="checkbox">
-									<input id="login-remember" type="checkbox">
-									Remember me
-								</label>
-							</div>
-							<div class="error-field" id="login-error" v-show="loginError.length" v-html="loginError"></div>
-							<div id="login-btn2" class="button is-block is-info is-large is-fullwidth" @click="login()" :class="{'busy': ajaxing}">
-								<div class="btn-normal-div">Login</div>
-								<div class="btn-busy-div spinner">
-									<div class="bounce1"></div>
-									<div class="bounce2"></div>
-									<div class="bounce3"></div>
-								</div>
-							</div>
-						</form>
+				<div class="navbar-burger burger" data-target="navMenu" :class="{'is-active': showingBurger}" @click="showingBurger=!showingBurger"><span></span><span></span><span></span></div>
+			</div>
+			<div class="navbar-menu" id="navMenu" :class="{'is-active': showingBurger}">
+				<div class="navbar-start is-link">
+					<div class="navbar-item has-dropdown is-hoverable">
+						<a class="navbar-link">Sections</a>
+						<div class="navbar-dropdown">
+							<a class="navbar-item" :href="base_url + '/npcs'">NPC Generator</a>
+							<a class="navbar-item" :href="base_url + '/hooks'">Plot Hooks</a>
+							<a class="navbar-item" :href="base_url + '/items'">Unique Items</a>
+							<a class="navbar-item" :href="base_url + '/maps'">Encounter Maps</a>
+							<a class="navbar-item" :href="base_url + '/riddles'">Riddles</a>
+							<a class="navbar-item" :href="base_url + '/puzzles'">Puzzles</a>
+							<!--
+							<a class="navbar-item" href="{{ url('dungeons') }}">Dungeons</a>
+							<a class="navbar-item" href="{{ url('names') }}">Name Generator</a>
+							<a class="navbar-item" href="{{ url('dice') }}">Dice Roller</a>
+							<a class="navbar-item" href="{{ url('loot') }}">Loot Generator</a>
+							<a class="navbar-item" href="{{ url('d100') }}">d100 Lists</a>
+							-->
+						</div>
 					</div>
-					<p class="login__modal__footer has-text-grey column is-8 is-offset-2">
-						<a @click="loginModalChangeTab('r')">Sign Up</a> &nbsp;·&nbsp;
-						<a href="../">Forgot Password</a> &nbsp;·&nbsp;
-						<a href="../">Need Help?</a>
-					</p>
 				</div>
-
-				<!--Register tab-->
-				<div id="login__modal__register" class="column login-tab" :class="{'active': activeTab==='r'}">
-					<div class="box">
-						<div class="modal__title">Create an Account</div>
-						<figure class="avatar">
-							<img src="/img/dnd_companion_logo.svg" onerror="this.onerror=null; this.src='/img/dnd_companion_logo.png'">
-						</figure>
-						<form>
-							<div class="error-field" id="register-username-error" v-show="rUsernameError.length" v-html="rUsernameError"></div>
-							<div class="field">
-								<div class="control">
-									<input id="register-username" class="input is-large" type="text" placeholder="Username" autofocus="" v-model="rUsername">
-								</div>
-							</div>
-
-							<div class="error-field" id="register-email-error" v-show="rEmailError.length" v-html="rEmailError"></div>
-							<div class="field">
-								<div class="control">
-									<input id="register-email" class="input is-large" type="email" placeholder="Email" v-model="rEmail">
-								</div>
-							</div>
-
-							<div class="error-field" id="register-password-error" v-show="rPasswordError.length" v-html="rPasswordError"></div>
-							<div class="field">
-								<div class="control">
-									<input id="register-password" class="input is-large" type="password" placeholder="Password" v-model="rPassword">
-								</div>
-							</div>
-							<div class="field">
-								<div class="control">
-									<input id="register-password-confirm" class="input is-large" type="password" placeholder="Confirm Password" v-model="rPassword2">
-								</div>
-							</div>
-							<div class="field">
-								<label class="checkbox">
-									<input id="register-remember" type="checkbox">
-									Remember me
-								</label>
-							</div>
-							<div class="error-field" id="register-error" v-show="registerError.length" v-html="registerError"></div>
-							<div id="register-btn" class="button is-block is-info is-large is-fullwidth" @click="register()" :class="{'busy': ajaxing}">
-								<div class="btn-normal-div">Create Account</div>
-								<div class="btn-busy-div spinner">
-									<div class="bounce1"></div>
-									<div class="bounce2"></div>
-									<div class="bounce3"></div>
-								</div>
-							</div>
-						</form>
-					</div>
-					<p class="login__modal__footer has-text-grey column is-8 is-offset-2">
-						<a @click="loginModalChangeTab('l')">Already have an account?</a> &nbsp;·&nbsp;
-						<a href="../">Need Help?</a>
-					</p>
+				<div v-if="LOGGED_IN" class="navbar-end">
+					<a class="navbar-item">Profile</a>
+					<a class="navbar-item">Settings</a>
+					<a id="nav-logout" class="navbar-item" :href="base_url + '/auth/logout'">Logout</a>
+				</div>
+				<div v-else class="navbar-end">
+					<a id="navbar-login" class="navbar-item" :href="base_url + '/auth/login'">
+						Login
+					</a>
+					<a id="navbar-register" class="navbar-item" :href="base_url + '/auth/register'">
+						Register
+					</a>
 				</div>
 			</div>
+		</nav>
+		<div id="login__modal" class="modal" :class="{'is-active': showingModal}">
+			<div class="modal-background" @click="hideLoginModal()"></div>
+			<div class="modal-content">
+				<div class="has-text-centered login-container">
+
+					<!--Login tab-->
+					<div id="login__modal__login" class="column login-tab" :class="{'active': activeTab==='l'}">
+						<div class="box">
+							<div class="modal__title" id="login-title">{{loginTitle}}</div>
+							<figure class="avatar">
+								<img src="/img/dnd_companion_logo.svg" onerror="this.onerror=null; this.src='/img/dnd_companion_logo.png'">
+							</figure>
+							<form>
+								<div class="error-field" id="login-email-error" v-show="lEmailError.length" v-html="lEmailError"></div>
+								<div class="field">
+									<div class="control">
+										<input id="login-email" class="input is-large" type="email" placeholder="Email" autofocus="" v-model="lEmail">
+									</div>
+								</div>
+
+								<div class="error-field" id="login-password-error" v-show="lPasswordError.length" v-html="lPasswordError"></div>
+								<div class="field">
+									<div class="control">
+										<input id="login-password" class="input is-large" type="password" placeholder="Password" v-model="lPassword">
+									</div>
+								</div>
+								<div class="field">
+									<label class="checkbox">
+										<input id="login-remember" type="checkbox">
+										Remember me
+									</label>
+								</div>
+								<div class="error-field" id="login-error" v-show="loginError.length" v-html="loginError"></div>
+								<div id="login-btn2" class="button is-block is-info is-large is-fullwidth" @click="login()" :class="{'busy': ajaxing}">
+									<div class="btn-normal-div">Login</div>
+									<div class="btn-busy-div spinner">
+										<div class="bounce1"></div>
+										<div class="bounce2"></div>
+										<div class="bounce3"></div>
+									</div>
+								</div>
+							</form>
+						</div>
+						<p class="login__modal__footer has-text-grey column is-8 is-offset-2">
+							<a @click="loginModalChangeTab('r')">Sign Up</a> &nbsp;·&nbsp;
+							<a href="../">Forgot Password</a> &nbsp;·&nbsp;
+							<a href="../">Need Help?</a>
+						</p>
+					</div>
+
+					<!--Register tab-->
+					<div id="login__modal__register" class="column login-tab" :class="{'active': activeTab==='r'}">
+						<div class="box">
+							<div class="modal__title">Create an Account</div>
+							<figure class="avatar">
+								<img src="/img/dnd_companion_logo.svg" onerror="this.onerror=null; this.src='/img/dnd_companion_logo.png'">
+							</figure>
+							<form>
+								<div class="error-field" id="register-username-error" v-show="rUsernameError.length" v-html="rUsernameError"></div>
+								<div class="field">
+									<div class="control">
+										<input id="register-username" class="input is-large" type="text" placeholder="Username" autofocus="" v-model="rUsername">
+									</div>
+								</div>
+
+								<div class="error-field" id="register-email-error" v-show="rEmailError.length" v-html="rEmailError"></div>
+								<div class="field">
+									<div class="control">
+										<input id="register-email" class="input is-large" type="email" placeholder="Email" v-model="rEmail">
+									</div>
+								</div>
+
+								<div class="error-field" id="register-password-error" v-show="rPasswordError.length" v-html="rPasswordError"></div>
+								<div class="field">
+									<div class="control">
+										<input id="register-password" class="input is-large" type="password" placeholder="Password" v-model="rPassword">
+									</div>
+								</div>
+								<div class="field">
+									<div class="control">
+										<input id="register-password-confirm" class="input is-large" type="password" placeholder="Confirm Password" v-model="rPassword2">
+									</div>
+								</div>
+								<div class="field">
+									<label class="checkbox">
+										<input id="register-remember" type="checkbox">
+										Remember me
+									</label>
+								</div>
+								<div class="error-field" id="register-error" v-show="registerError.length" v-html="registerError"></div>
+								<div id="register-btn" class="button is-block is-info is-large is-fullwidth" @click="register()" :class="{'busy': ajaxing}">
+									<div class="btn-normal-div">Create Account</div>
+									<div class="btn-busy-div spinner">
+										<div class="bounce1"></div>
+										<div class="bounce2"></div>
+										<div class="bounce3"></div>
+									</div>
+								</div>
+							</form>
+						</div>
+						<p class="login__modal__footer has-text-grey column is-8 is-offset-2">
+							<a @click="loginModalChangeTab('l')">Already have an account?</a> &nbsp;·&nbsp;
+							<a href="../">Need Help?</a>
+						</p>
+					</div>
+				</div>
+			</div>
+			<button class="modal-close is-large" aria-label="close" @click="hideLoginModal()"></button>
+			<!-- TODO needs csrf -->
+			<form id="frm-logout" action="/auth/logout" method="POST" style="display: none;"></form>
 		</div>
-		<button class="modal-close is-large" aria-label="close" @click="hideLoginModal()"></button>
-		<!-- TODO needs csrf -->
-		<form id="frm-logout" action="/auth/logout" method="POST" style="display: none;"></form>
 	</div>
 </template>
 <script>
@@ -138,7 +182,9 @@ export default {
 			rPassword2: '',
 			lEmail: '',
 			lPassword: '',
-			base_url: window.location.origin
+			base_url: window.location.origin,
+			LOGGED_IN: false,
+			showingBurger: false
 		}
 	},
 	mounted: function() {
@@ -164,6 +210,9 @@ export default {
 		});
 	},
 	methods: {
+		toggleBurger: function() {
+			this.showingBurger=true;
+		},
 		showLoginModal: function(title) {
 			this.loginTitle = title || "Login";
 			this.loginModalChangeTab('l');
