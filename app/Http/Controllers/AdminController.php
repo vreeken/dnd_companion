@@ -10,7 +10,11 @@ use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\User;
 
+use App\Traits\UserAndOptionsUtils;
+
 class AdminController extends Controller {
+
+	use UserAndOptionsUtils;
 
 	public function accountInfo(Request $request) {
 		$currentUser = JWTAuth::parseToken()->authenticate();
@@ -48,6 +52,10 @@ class AdminController extends Controller {
 
 		//Token is valid, might as well give them a new one
 		return response()->json(['success'=>'success', 'jwt'=>JWTAuth::refresh($token), 'id'=>$user->id, 'username'=>$user->username, 'email'=>$user->email, 'account_status'=>$user->account_status]);
+	}
+
+	public function updateUserOptions(Request $request) {
+		return self::saveOptions($request);
 	}
 
 

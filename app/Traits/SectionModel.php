@@ -202,8 +202,7 @@ trait SectionModel {
 		$data['post_type_pretty']=POST_TYPE_PRETTY;
 
 		// BEWARE $options->showExternalImages will return a boolean which doesn't pass to views as a string
-		$data['show_external_images']=$options && isset($options->showExternalImages) ? 'true' : 'false';
-		
+		$data['show_external_images']=$options && isset($options->showExternalImages) && $options->showExternalImages ? 'true' : 'false';		
 		
 		return view('sections.main', ['data'=>$data]);
 	}

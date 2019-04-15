@@ -38,7 +38,8 @@ class User extends Authenticatable implements JWTSubject
 	  'password' => 'required|min:6'
 	];
 
-	const DEFAULT_OPTIONS = '{"showExternalImages": "abc"}';
+	const DEFAULT_OPTIONS = '{"showExternalImages": "false"}';
+	const USER_OPTION_KEYS = ["showExternalImages"];
 
 	/**
 	* Get the identifier that will be stored in the subject claim of the JWT.

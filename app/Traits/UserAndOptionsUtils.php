@@ -53,7 +53,7 @@ trait UserAndOptionsUtils {
         $options = self::getUserOptions();
 
         //Make sure option key is valid
-        if (!in_array($key, USER_OPTION_KEYS, true)) {
+        if (!in_array($key, User::USER_OPTION_KEYS, true)) {
             return false;
         }
         $options->$key = $val;
@@ -64,10 +64,10 @@ trait UserAndOptionsUtils {
             if ($user->save()) {
                 return true;
             }
-        } else {
-            //otherwise store option data in session
-            session(['user_options' => json_encode($options)]);
         }
+        // Also store option data in session (mostly in case user isn't logged in)
+        session(['user_options' => json_encode($options)]);
+        
         return true;
     }
 
