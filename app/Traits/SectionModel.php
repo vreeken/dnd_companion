@@ -63,6 +63,8 @@ trait SectionModel {
 		//		Another option is to just grab random ids, but if they are deleted, then we just return 9 instead of 10 entries
 		//		Another option is to live with the slow order by RAND(), but to pre-fetch everything so that it doesn't seem slow to the user
 
+		
+
         if ($request->has('id')) {
             return self::getSinglePostById($request->input('id'));
         }
@@ -79,7 +81,9 @@ trait SectionModel {
 		switch ($method) {
 			case 'r':
 				//Random
-				$ORDER_BY_QUERY = 'RAND('.$seed.')';
+				//$ORDER_BY_QUERY = 'RAND('.$seed.')';
+				$ORDER_BY_QUERY = null;
+				$WHERE_RAW = self::$POST_TABLE . '.id IN (SELECT `id` FROM (SELECT `id` FROM `' . self::$POST_TABLE . '` ORDER BY RAND(' . $seed . ') LIMIT ' . $qty . ' OFFSET ' . ($page * $qty) . ') t)';
 				break;
 			case 'uv':
 				//Upvotes, Descending (Upvotes)			
@@ -115,85 +119,63 @@ trait SectionModel {
 			$RAW_VOTED_QUERY = '-1 AS voted, 0 AS saved';
 		}
 
-
+		$SELECTS = [
+			DB::raw(self::$POST_SELECT_QUERY), 
+			DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=1) as upvotes'),
+			DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=0) as downvotes'),
+			DB::raw('(SELECT count(*) FROM '.self::$POST_TYPE.'_comments WHERE '.self::$POST_TYPE.'_comments.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id) as commentcount'),
+			DB::raw($RAW_VOTED_QUERY)
+		];
 
 		switch ($filter) {
 			case 1:
 				//Just Mine
 				if (!$user) { return response()->json(['error'=>'invalid_data'], 400); }
 				$posts = DB::table(self::$POST_TABLE)
-						->join('users', self::$POST_TABLE.'.user_id', '=', 'users.id')
-						->select(
-							DB::raw(self::$POST_SELECT_QUERY), 
-							DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=1) as upvotes'),
-							DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=0) as downvotes'),
-							DB::raw('(SELECT count(*) FROM '.self::$POST_TYPE.'_comments WHERE '.self::$POST_TYPE.'_comments.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id) as commentcount'),
-							DB::raw($RAW_VOTED_QUERY))
-						->where(self::$POST_TABLE.'.user_id', $user->id)
-						->whereNull(self::$POST_TABLE.'.deleted_at')
-						->take($qty)
-						->orderByRaw($ORDER_BY_QUERY)
-						->skip($page * $qty)
-						->get();
+					->join('users', self::$POST_TABLE.'.user_id', '=', 'users.id')
+					->select($SELECTS)
+					->where(self::$POST_TABLE.'.user_id', $user->id);
 				break;
 			case 2:
 				//Not Mine
 				if (!$user) { return response()->json(['error'=>'invalid_data'], 400); }
 				$posts = DB::table(self::$POST_TABLE)
-						->join('users', self::$POST_TABLE.'.user_id', '=', 'users.id')
-						->select(
-							DB::raw(self::$POST_SELECT_QUERY), 
-							DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=1) as upvotes'),
-							DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=0) as downvotes'),
-							DB::raw('(SELECT count(*) FROM '.self::$POST_TYPE.'_comments WHERE '.self::$POST_TYPE.'_comments.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id) as commentcount'),
-							DB::raw($RAW_VOTED_QUERY))
-						->where(self::$POST_TABLE.'.user_id', '<>', $user->id)
-						->whereNull(self::$POST_TABLE.'.deleted_at')
-						->take($qty)
-						->orderByRaw($ORDER_BY_QUERY)
-						->skip($page * $qty)
-						->get();
+					->join('users', self::$POST_TABLE.'.user_id', '=', 'users.id')
+					->select($SELECTS)
+					->where(self::$POST_TABLE.'.user_id', '<>', $user->id);
 				break;
 			case 3:
 				//Saved
 				if (!$user) { return response()->json(['error'=>'invalid_data'], 400); }
 				$posts = DB::table(self::$POST_TABLE)
-						->join('users', self::$POST_TABLE.'.user_id', '=', 'users.id')
-						->join(self::$POST_TYPE.'_bookmarks', self::$POST_TYPE.'_bookmarks.'.self::$POST_TYPE.'_id', '=', self::$POST_TABLE.'.id') //
-						->select(
-							DB::raw(self::$POST_SELECT_QUERY), 
-							DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=1) as upvotes'),
-							DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=0) as downvotes'),
-							DB::raw('(SELECT count(*) FROM '.self::$POST_TYPE.'_comments WHERE '.self::$POST_TYPE.'_comments.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id) as commentcount'),
-							DB::raw($RAW_VOTED_QUERY))
-						->where(self::$POST_TYPE.'_bookmarks.user_id', $user->id)
-						->whereNull(self::$POST_TABLE.'.deleted_at')
-						->take($qty)
-						->orderByRaw($ORDER_BY_QUERY)
-						->skip($page * $qty)
-						->get();
+					->join('users', self::$POST_TABLE.'.user_id', '=', 'users.id')
+					->join(self::$POST_TYPE.'_bookmarks', self::$POST_TYPE.'_bookmarks.'.self::$POST_TYPE.'_id', '=', self::$POST_TABLE.'.id') //
+					->select($SELECTS)
+					->where(self::$POST_TYPE.'_bookmarks.user_id', $user->id);
 				break;
 			default:
 				//case 0 and default
 				//ALL Posts
 				$posts = DB::table(self::$POST_TABLE)
 					->join('users', self::$POST_TABLE.'.user_id', '=', 'users.id')
-					->select(
-						DB::raw(self::$POST_SELECT_QUERY), 
-						DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=1) as upvotes'),
-						DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=0) as downvotes'),
-						DB::raw('(SELECT count(*) FROM '.self::$POST_TYPE.'_comments WHERE '.self::$POST_TYPE.'_comments.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id) as commentcount'),
-						DB::raw($RAW_VOTED_QUERY))
-					->whereNull(self::$POST_TABLE.'.deleted_at')
-					->take($qty)
-					->orderByRaw($ORDER_BY_QUERY)
-					->skip($page * $qty)
-					->get();
+					->select($SELECTS);
 				break;
 		}
 
-		$output['success']=true;
-		$output['posts']=$posts;
+		$posts->whereNull(self::$POST_TABLE.'.deleted_at');
+					
+		//The Random query uses a where in statement to order, while all others use a order by, so choose appropriately
+		if ($method === 'r') {
+			$posts->whereRaw($WHERE_RAW);
+		}
+		else {
+			$posts->orderByRaw($ORDER_BY_QUERY)
+			->take($qty)
+			->skip($page * $qty);
+		}
+
+		$output['success'] = true;
+		$output['posts'] = $posts->get();
 
 		return $output;
 	}
