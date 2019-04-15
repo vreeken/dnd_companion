@@ -69,5 +69,5 @@ Route::group(['middleware' => 'jwt.auth'], function () {
 
 	Route::get('admin/account',				'JWTAuthController@getAccountInfo');
 
-	Route::post('save-options', 			'PostBaseController@saveOptions');
+	Route::post('save-options', 			'AdminController@updateUserOptions');
 });
