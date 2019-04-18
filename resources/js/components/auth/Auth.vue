@@ -27,7 +27,7 @@
 						</div>
 					</div>
 				</div>
-				<div v-if="LOGGED_IN" class="navbar-end">
+				<div v-if="authenticated" class="navbar-end">
 					<a class="navbar-item">Profile</a>
 					<a class="navbar-item">Settings</a>
 					<a id="nav-logout" class="navbar-item" :href="base_url + '/auth/logout'">Logout</a>
@@ -161,7 +161,7 @@ import { EventBus } from '../eventbus/EventBus.js';
 
 export default {
 	props: {
-		data: Object
+		authenticated: Boolean
 	},
 	data() {
 		return {
@@ -183,7 +183,6 @@ export default {
 			lEmail: '',
 			lPassword: '',
 			base_url: window.location.origin,
-			LOGGED_IN: false,
 			showingBurger: false
 		}
 	},
