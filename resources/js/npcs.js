@@ -28,11 +28,9 @@ axios.interceptors.request.use(config => {
 // before a response is returned stop vue-progressbar
 axios.interceptors.response.use(response => {
 	if (response.status !== 200) {
-		console.log('ajax fail');
 		app.$Progress.fail();
 	}
 	else {
-		console.log('end ajax');
 		app.$Progress.finish();
 	}
 	return response;
