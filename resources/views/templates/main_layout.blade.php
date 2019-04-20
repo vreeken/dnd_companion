@@ -8,8 +8,8 @@
 		{{-- CSRF Token --}}
 		<meta name="csrf-token" content="{{ csrf_token() }}">
 
-		<title>@if (trim($__env->yieldContent('title'))) @yield('title') @else DM Companion @endif</title>
-		<meta name="description" content="DM Companion: A Dungeon Master's Best Friend. Made for D&D 5e, usable by all.">
+		<title>@if (trim($__env->yieldContent('title'))) @yield('title') @else DnD Companion @endif</title>
+		<meta name="description" content="DnD Companion: A Dungeon Master's Best Friend. Made for D&D 5e, usable by all.">
 		<meta name="author" content="Michael Vreeken">
 
 		<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('/apple-touch-icon.png') }}">
@@ -50,8 +50,12 @@
 	</head>
 	<body>
 		<div id="app" >
-				@include('templates.partials.nav')
-				@yield('auth')
+				
+				@if (Auth::check())
+					<auth :authenticated="true"></auth>
+				@else
+					<auth :authenticated="false"></auth>
+				@endif
 
 				<div class="body-container">
 				
