@@ -12,10 +12,6 @@
 	
 @endsection
 
-@section('auth')
-	<auth></auth>
-@endsection
-
 @section('content')
 	<npcs :data='@json($data)'></npcs>
 @endsection
