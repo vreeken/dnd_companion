@@ -792,14 +792,13 @@ __webpack_require__.r(__webpack_exports__);
         return;
       }
 
-      this.showExternalImages = !this.showExternalImages;
       this.ajaxingShowExternalImages = true;
 
       var _this = this;
 
       axios.post(SAVE_OPTIONS_URL, {
         option: 'showExternalImages',
-        value: _this.showExternalImages
+        value: !this.showExternalImages
       }, config).then(function (response) {}).catch(function (error) {//
         //_this.showExternalImages=!_this.showExternalImages;
       }).then(function () {
@@ -1124,6 +1123,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./eventbus/EventBus.js */ "./resources/js/components/eventbus/EventBus.js");
 //
 //
 //
@@ -1177,6 +1177,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {
     fromNow: function fromNow(v) {
@@ -1198,6 +1199,14 @@ __webpack_require__.r(__webpack_exports__);
     return {
       postTypeListview: this.componentPostType + '-listview'
     };
+  },
+  mounted: function mounted() {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('postLogin', function () {
+      window.location.reload();
+    });
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('postRegister', function () {
+      window.location.reload();
+    });
   },
   computed: {},
   methods: {
@@ -1268,6 +1277,372 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {},
   methods: {}
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/Auth.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/auth/Auth.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../eventbus/EventBus.js */ "./resources/js/components/eventbus/EventBus.js");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: {
+    authenticated: Boolean
+  },
+  data: function data() {
+    return {
+      showingModal: false,
+      loginTitle: 'Login',
+      activeTab: 'l',
+      ajaxing: false,
+      loginError: '',
+      lEmailError: '',
+      lPasswordError: '',
+      rEmailError: '',
+      rPasswordError: '',
+      rUsernameError: '',
+      registerError: '',
+      rUsername: '',
+      rEmail: '',
+      rPassword: '',
+      rPassword2: '',
+      lEmail: '',
+      lPassword: '',
+      base_url: window.location.origin,
+      showingBurger: false
+    };
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    if (document.getElementById("navbar-login")) {
+      document.getElementById("navbar-login").addEventListener('click', function (event) {
+        event.preventDefault();
+
+        _this.showLoginModal();
+      });
+    }
+
+    if (document.getElementById("navbar-register")) {
+      document.getElementById("navbar-register").addEventListener('click', function (event) {
+        event.preventDefault();
+
+        _this.showRegisterModal();
+      });
+    }
+
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('showLogin', function (title) {
+      _this.showLoginModal(title);
+    });
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('showRegister', function () {
+      _this.showRegisterModal();
+    });
+  },
+  methods: {
+    toggleBurger: function toggleBurger() {
+      this.showingBurger = true;
+    },
+    showLoginModal: function showLoginModal(title) {
+      this.loginTitle = title || "Login";
+      this.loginModalChangeTab('l');
+      this.showingModal = true;
+    },
+    showRegisterModal: function showRegisterModal() {
+      this.loginModalChangeTab('r');
+      this.showingModal = true;
+    },
+    hideLoginModal: function hideLoginModal() {
+      this.showingModal = false;
+    },
+    loginModalChangeTab: function loginModalChangeTab(a) {
+      this.activeTab = a;
+    },
+    login: function login() {
+      this.loginError = '';
+      this.lEmailError = '';
+      this.lPasswordError = '';
+
+      if (!this.lEmail.length) {
+        this.lEmailError = "Please Input Your Email";
+        return;
+      }
+
+      if (!this.lPassword.length) {
+        this.lPasswordError = "Please Input Your Password";
+        return;
+      }
+
+      var re = document.querySelector('#login-remember').checked;
+      this.ajaxing = true;
+
+      var _this = this;
+
+      axios.post(this.base_url + '/auth/login', {
+        email: this.lEmail,
+        password: this.lPassword,
+        remember: re
+      }).then(function (response) {
+        _this.ajaxing = false;
+
+        if (response.data.jwt) {
+          localStorage.setItem('jwt', response.data.jwt); //Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
+
+          _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('postLogin');
+        } else {
+          _this.loginError = "An error occurred. Please try again.";
+        }
+      }).catch(function (error) {
+        _this.ajaxing = false;
+
+        if (error.response.status === 401) {
+          _this.loginError = "Invalid Email/Password";
+        } else {
+          _this.loginError = "An error occurred. Please try again.";
+        }
+      });
+    },
+    register: function register() {
+      this.registerError = '';
+      this.rUsernameError = '';
+      this.rEmailError = '';
+      this.rPasswordError = '';
+
+      if (!this.rEmail.length) {
+        this.rEmailError = "Please Input Your Email";
+      } else if (this.rEmail.indexOf('@') === -1 || this.rEmail.indexOf('.') === -1) {
+        this.rEmailError = "Please Input a Valid Email";
+      }
+
+      if (!this.rUsername.length) {
+        this.rUsernameError = "Please Input Your Username";
+      }
+
+      if (this.rPassword.length < 6) {
+        this.rPasswordError = "Please Input Your Password (Min 6 Characters)";
+      }
+
+      if (this.rPassword !== this.rPassword2) {
+        this.rPasswordError = "Your Passwords Do Not Match";
+      }
+
+      if (this.rEmailError.length || this.rUsernameError.length || this.rPasswordError.length) {
+        return;
+      }
+
+      var re = document.querySelector('#register-remember').checked;
+      this.ajaxing = true;
+
+      var _this = this;
+
+      axios.post(this.base_url + "/auth/register", {
+        email: this.rEmail,
+        username: this.rUsername,
+        password: this.rPassword,
+        remember: re
+      }).then(function (response) {
+        _this.ajaxing = false;
+
+        if (response.data.jwt) {
+          localStorage.setItem('jwt', response.data.jwt); //Let other components know (specifically the Npc_generator.vue so it can save npc before refreshing the page)
+
+          _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('postRegister');
+        } else {
+          _this.registerError = "An error occurred. Please try again.";
+        }
+      }).catch(function (error) {
+        _this.ajaxing = false;
+
+        if (error.response && error.response.data && error.response.data.error) {
+          switch (error.response.data.error) {
+            case "invalid_password":
+              _this.registerError = "Your password must be at least 6 characters long";
+              break;
+
+            case "username_in_use":
+              _this.registerError = "This username is already in use";
+              break;
+
+            case "email_in_use":
+              _this.registerError = "This email is already in use";
+              break;
+
+            case "unable_to_send_email":
+              _this.registerError = "An error occurred. Please try again.";
+              break;
+
+            default:
+              _this.registerError = "An error occurred. Please try again.";
+          }
+        } else {
+          _this.registerError = "An error occurred. Please try again.";
+        }
+      });
+    }
+  }
 });
 
 /***/ }),
@@ -4444,6 +4819,718 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/Auth.vue?vue&type=template&id=29320894&":
+/*!************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/auth/Auth.vue?vue&type=template&id=29320894& ***!
+  \************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c("nav", { staticClass: "navbar has-shadow" }, [
+      _c("div", { staticClass: "navbar-brand" }, [
+        _c(
+          "a",
+          { staticClass: "navbar-item", attrs: { href: _vm.base_url + "/" } },
+          [
+            _c("img", {
+              attrs: {
+                src: _vm.base_url + "/img/dnd_companion_logo_simple.svg",
+                alt: "DnD Companion",
+                onerror:
+                  "this.onerror=null; this.src=window.location.origin+'/img/dnd_companion_logo_small.png'"
+              }
+            })
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            staticClass: "navbar-burger burger",
+            class: { "is-active": _vm.showingBurger },
+            attrs: { "data-target": "navMenu" },
+            on: {
+              click: function($event) {
+                _vm.showingBurger = !_vm.showingBurger
+              }
+            }
+          },
+          [_c("span"), _c("span"), _c("span")]
+        )
+      ]),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass: "navbar-menu",
+          class: { "is-active": _vm.showingBurger },
+          attrs: { id: "navMenu" }
+        },
+        [
+          _c("div", { staticClass: "navbar-start is-link" }, [
+            _c(
+              "div",
+              { staticClass: "navbar-item has-dropdown is-hoverable" },
+              [
+                _c("a", { staticClass: "navbar-link" }, [_vm._v("Sections")]),
+                _vm._v(" "),
+                _c("div", { staticClass: "navbar-dropdown" }, [
+                  _c(
+                    "a",
+                    {
+                      staticClass: "navbar-item",
+                      attrs: { href: _vm.base_url + "/npcs" }
+                    },
+                    [_vm._v("NPC Generator")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "a",
+                    {
+                      staticClass: "navbar-item",
+                      attrs: { href: _vm.base_url + "/hooks" }
+                    },
+                    [_vm._v("Plot Hooks")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "a",
+                    {
+                      staticClass: "navbar-item",
+                      attrs: { href: _vm.base_url + "/items" }
+                    },
+                    [_vm._v("Unique Items")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "a",
+                    {
+                      staticClass: "navbar-item",
+                      attrs: { href: _vm.base_url + "/maps" }
+                    },
+                    [_vm._v("Encounter Maps")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "a",
+                    {
+                      staticClass: "navbar-item",
+                      attrs: { href: _vm.base_url + "/riddles" }
+                    },
+                    [_vm._v("Riddles")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "a",
+                    {
+                      staticClass: "navbar-item",
+                      attrs: { href: _vm.base_url + "/puzzles" }
+                    },
+                    [_vm._v("Puzzles")]
+                  )
+                ])
+              ]
+            )
+          ]),
+          _vm._v(" "),
+          _vm.authenticated
+            ? _c("div", { staticClass: "navbar-end" }, [
+                _c("a", { staticClass: "navbar-item" }, [_vm._v("Profile")]),
+                _vm._v(" "),
+                _c("a", { staticClass: "navbar-item" }, [_vm._v("Settings")]),
+                _vm._v(" "),
+                _c(
+                  "a",
+                  {
+                    staticClass: "navbar-item",
+                    attrs: {
+                      id: "nav-logout",
+                      href: _vm.base_url + "/auth/logout"
+                    }
+                  },
+                  [_vm._v("Logout")]
+                )
+              ])
+            : _c("div", { staticClass: "navbar-end" }, [
+                _c(
+                  "a",
+                  {
+                    staticClass: "navbar-item",
+                    attrs: {
+                      id: "navbar-login",
+                      href: _vm.base_url + "/auth/login"
+                    }
+                  },
+                  [_vm._v("\n\t\t\t\t\tLogin\n\t\t\t\t")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "a",
+                  {
+                    staticClass: "navbar-item",
+                    attrs: {
+                      id: "navbar-register",
+                      href: _vm.base_url + "/auth/register"
+                    }
+                  },
+                  [_vm._v("\n\t\t\t\t\tRegister\n\t\t\t\t")]
+                )
+              ])
+        ]
+      )
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal",
+        class: { "is-active": _vm.showingModal },
+        attrs: { id: "login__modal" }
+      },
+      [
+        _c("div", {
+          staticClass: "modal-background",
+          on: {
+            click: function($event) {
+              return _vm.hideLoginModal()
+            }
+          }
+        }),
+        _vm._v(" "),
+        _c("div", { staticClass: "modal-content" }, [
+          _c("div", { staticClass: "has-text-centered login-container" }, [
+            _c(
+              "div",
+              {
+                staticClass: "column login-tab",
+                class: { active: _vm.activeTab === "l" },
+                attrs: { id: "login__modal__login" }
+              },
+              [
+                _c("div", { staticClass: "box" }, [
+                  _c(
+                    "div",
+                    {
+                      staticClass: "modal__title",
+                      attrs: { id: "login-title" }
+                    },
+                    [_vm._v(_vm._s(_vm.loginTitle))]
+                  ),
+                  _vm._v(" "),
+                  _vm._m(0),
+                  _vm._v(" "),
+                  _c("form", [
+                    _c("div", {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.lEmailError.length,
+                          expression: "lEmailError.length"
+                        }
+                      ],
+                      staticClass: "error-field",
+                      attrs: { id: "login-email-error" },
+                      domProps: { innerHTML: _vm._s(_vm.lEmailError) }
+                    }),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "field" }, [
+                      _c("div", { staticClass: "control" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.lEmail,
+                              expression: "lEmail"
+                            }
+                          ],
+                          staticClass: "input is-large",
+                          attrs: {
+                            id: "login-email",
+                            type: "email",
+                            placeholder: "Email",
+                            autofocus: ""
+                          },
+                          domProps: { value: _vm.lEmail },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.lEmail = $event.target.value
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.lPasswordError.length,
+                          expression: "lPasswordError.length"
+                        }
+                      ],
+                      staticClass: "error-field",
+                      attrs: { id: "login-password-error" },
+                      domProps: { innerHTML: _vm._s(_vm.lPasswordError) }
+                    }),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "field" }, [
+                      _c("div", { staticClass: "control" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.lPassword,
+                              expression: "lPassword"
+                            }
+                          ],
+                          staticClass: "input is-large",
+                          attrs: {
+                            id: "login-password",
+                            type: "password",
+                            placeholder: "Password"
+                          },
+                          domProps: { value: _vm.lPassword },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.lPassword = $event.target.value
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _vm._m(1),
+                    _vm._v(" "),
+                    _c("div", {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.loginError.length,
+                          expression: "loginError.length"
+                        }
+                      ],
+                      staticClass: "error-field",
+                      attrs: { id: "login-error" },
+                      domProps: { innerHTML: _vm._s(_vm.loginError) }
+                    }),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "button is-block is-info is-large is-fullwidth",
+                        class: { busy: _vm.ajaxing },
+                        attrs: { id: "login-btn2" },
+                        on: {
+                          click: function($event) {
+                            return _vm.login()
+                          }
+                        }
+                      },
+                      [
+                        _c("div", { staticClass: "btn-normal-div" }, [
+                          _vm._v("Login")
+                        ]),
+                        _vm._v(" "),
+                        _vm._m(2)
+                      ]
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c(
+                  "p",
+                  {
+                    staticClass:
+                      "login__modal__footer has-text-grey column is-8 is-offset-2"
+                  },
+                  [
+                    _c(
+                      "a",
+                      {
+                        on: {
+                          click: function($event) {
+                            return _vm.loginModalChangeTab("r")
+                          }
+                        }
+                      },
+                      [_vm._v("Sign Up")]
+                    ),
+                    _vm._v("  · \n\t\t\t\t\t\t"),
+                    _c("a", { attrs: { href: "../" } }, [
+                      _vm._v("Forgot Password")
+                    ]),
+                    _vm._v("  · \n\t\t\t\t\t\t"),
+                    _c("a", { attrs: { href: "../" } }, [_vm._v("Need Help?")])
+                  ]
+                )
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass: "column login-tab",
+                class: { active: _vm.activeTab === "r" },
+                attrs: { id: "login__modal__register" }
+              },
+              [
+                _c("div", { staticClass: "box" }, [
+                  _c("div", { staticClass: "modal__title" }, [
+                    _vm._v("Create an Account")
+                  ]),
+                  _vm._v(" "),
+                  _vm._m(3),
+                  _vm._v(" "),
+                  _c("form", [
+                    _c("div", {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.rUsernameError.length,
+                          expression: "rUsernameError.length"
+                        }
+                      ],
+                      staticClass: "error-field",
+                      attrs: { id: "register-username-error" },
+                      domProps: { innerHTML: _vm._s(_vm.rUsernameError) }
+                    }),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "field" }, [
+                      _c("div", { staticClass: "control" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.rUsername,
+                              expression: "rUsername"
+                            }
+                          ],
+                          staticClass: "input is-large",
+                          attrs: {
+                            id: "register-username",
+                            type: "text",
+                            placeholder: "Username",
+                            autofocus: ""
+                          },
+                          domProps: { value: _vm.rUsername },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.rUsername = $event.target.value
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.rEmailError.length,
+                          expression: "rEmailError.length"
+                        }
+                      ],
+                      staticClass: "error-field",
+                      attrs: { id: "register-email-error" },
+                      domProps: { innerHTML: _vm._s(_vm.rEmailError) }
+                    }),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "field" }, [
+                      _c("div", { staticClass: "control" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.rEmail,
+                              expression: "rEmail"
+                            }
+                          ],
+                          staticClass: "input is-large",
+                          attrs: {
+                            id: "register-email",
+                            type: "email",
+                            placeholder: "Email"
+                          },
+                          domProps: { value: _vm.rEmail },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.rEmail = $event.target.value
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.rPasswordError.length,
+                          expression: "rPasswordError.length"
+                        }
+                      ],
+                      staticClass: "error-field",
+                      attrs: { id: "register-password-error" },
+                      domProps: { innerHTML: _vm._s(_vm.rPasswordError) }
+                    }),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "field" }, [
+                      _c("div", { staticClass: "control" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.rPassword,
+                              expression: "rPassword"
+                            }
+                          ],
+                          staticClass: "input is-large",
+                          attrs: {
+                            id: "register-password",
+                            type: "password",
+                            placeholder: "Password"
+                          },
+                          domProps: { value: _vm.rPassword },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.rPassword = $event.target.value
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "field" }, [
+                      _c("div", { staticClass: "control" }, [
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.rPassword2,
+                              expression: "rPassword2"
+                            }
+                          ],
+                          staticClass: "input is-large",
+                          attrs: {
+                            id: "register-password-confirm",
+                            type: "password",
+                            placeholder: "Confirm Password"
+                          },
+                          domProps: { value: _vm.rPassword2 },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.rPassword2 = $event.target.value
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _vm._m(4),
+                    _vm._v(" "),
+                    _c("div", {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.registerError.length,
+                          expression: "registerError.length"
+                        }
+                      ],
+                      staticClass: "error-field",
+                      attrs: { id: "register-error" },
+                      domProps: { innerHTML: _vm._s(_vm.registerError) }
+                    }),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "button is-block is-info is-large is-fullwidth",
+                        class: { busy: _vm.ajaxing },
+                        attrs: { id: "register-btn" },
+                        on: {
+                          click: function($event) {
+                            return _vm.register()
+                          }
+                        }
+                      },
+                      [
+                        _c("div", { staticClass: "btn-normal-div" }, [
+                          _vm._v("Create Account")
+                        ]),
+                        _vm._v(" "),
+                        _vm._m(5)
+                      ]
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c(
+                  "p",
+                  {
+                    staticClass:
+                      "login__modal__footer has-text-grey column is-8 is-offset-2"
+                  },
+                  [
+                    _c(
+                      "a",
+                      {
+                        on: {
+                          click: function($event) {
+                            return _vm.loginModalChangeTab("l")
+                          }
+                        }
+                      },
+                      [_vm._v("Already have an account?")]
+                    ),
+                    _vm._v("  · \n\t\t\t\t\t\t"),
+                    _c("a", { attrs: { href: "../" } }, [_vm._v("Need Help?")])
+                  ]
+                )
+              ]
+            )
+          ])
+        ]),
+        _vm._v(" "),
+        _c("button", {
+          staticClass: "modal-close is-large",
+          attrs: { "aria-label": "close" },
+          on: {
+            click: function($event) {
+              return _vm.hideLoginModal()
+            }
+          }
+        }),
+        _vm._v(" "),
+        _c("form", {
+          staticStyle: { display: "none" },
+          attrs: { id: "frm-logout", action: "/auth/logout", method: "POST" }
+        })
+      ]
+    )
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("figure", { staticClass: "avatar" }, [
+      _c("img", {
+        attrs: {
+          src: "/img/dnd_companion_logo.svg",
+          onerror: "this.onerror=null; this.src='/img/dnd_companion_logo.png'"
+        }
+      })
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "field" }, [
+      _c("label", { staticClass: "checkbox" }, [
+        _c("input", { attrs: { id: "login-remember", type: "checkbox" } }),
+        _vm._v("\n\t\t\t\t\t\t\t\t\tRemember me\n\t\t\t\t\t\t\t\t")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "btn-busy-div spinner" }, [
+      _c("div", { staticClass: "bounce1" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "bounce2" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "bounce3" })
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("figure", { staticClass: "avatar" }, [
+      _c("img", {
+        attrs: {
+          src: "/img/dnd_companion_logo.svg",
+          onerror: "this.onerror=null; this.src='/img/dnd_companion_logo.png'"
+        }
+      })
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "field" }, [
+      _c("label", { staticClass: "checkbox" }, [
+        _c("input", { attrs: { id: "register-remember", type: "checkbox" } }),
+        _vm._v("\n\t\t\t\t\t\t\t\t\tRemember me\n\t\t\t\t\t\t\t\t")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "btn-busy-div spinner" }, [
+      _c("div", { staticClass: "bounce1" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "bounce2" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "bounce3" })
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/comments/Comment.vue?vue&type=template&id=62ce996f&":
 /*!*******************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/comments/Comment.vue?vue&type=template&id=62ce996f& ***!
@@ -7201,6 +8288,75 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/auth/Auth.vue":
+/*!***********************************************!*\
+  !*** ./resources/js/components/auth/Auth.vue ***!
+  \***********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Auth_vue_vue_type_template_id_29320894___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Auth.vue?vue&type=template&id=29320894& */ "./resources/js/components/auth/Auth.vue?vue&type=template&id=29320894&");
+/* harmony import */ var _Auth_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Auth.vue?vue&type=script&lang=js& */ "./resources/js/components/auth/Auth.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _Auth_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Auth_vue_vue_type_template_id_29320894___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _Auth_vue_vue_type_template_id_29320894___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/auth/Auth.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/auth/Auth.vue?vue&type=script&lang=js&":
+/*!************************************************************************!*\
+  !*** ./resources/js/components/auth/Auth.vue?vue&type=script&lang=js& ***!
+  \************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Auth_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./Auth.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/Auth.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Auth_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/auth/Auth.vue?vue&type=template&id=29320894&":
+/*!******************************************************************************!*\
+  !*** ./resources/js/components/auth/Auth.vue?vue&type=template&id=29320894& ***!
+  \******************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Auth_vue_vue_type_template_id_29320894___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./Auth.vue?vue&type=template&id=29320894& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/Auth.vue?vue&type=template&id=29320894&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Auth_vue_vue_type_template_id_29320894___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Auth_vue_vue_type_template_id_29320894___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./resources/js/components/comments/Comment.vue":
 /*!******************************************************!*\
   !*** ./resources/js/components/comments/Comment.vue ***!
@@ -7681,6 +8837,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DungeonPostview_vue_vue_type_template_id_1326b498___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
+
+/***/ }),
+
+/***/ "./resources/js/components/eventbus/EventBus.js":
+/*!******************************************************!*\
+  !*** ./resources/js/components/eventbus/EventBus.js ***!
+  \******************************************************/
+/*! exports provided: EventBus */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EventBus", function() { return EventBus; });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue__WEBPACK_IMPORTED_MODULE_0__);
+
+var EventBus = new vue__WEBPACK_IMPORTED_MODULE_0___default.a();
 
 /***/ }),
 
@@ -8744,6 +9917,7 @@ __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 //Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 
 
+Vue.component('auth', __webpack_require__(/*! ./components/auth/Auth.vue */ "./resources/js/components/auth/Auth.vue").default);
 Vue.component('main-view', __webpack_require__(/*! ./components/Main.vue */ "./resources/js/components/Main.vue").default);
 Vue.component('posts', __webpack_require__(/*! ./components/Posts.vue */ "./resources/js/components/Posts.vue").default);
 Vue.component('post', __webpack_require__(/*! ./components/Post.vue */ "./resources/js/components/Post.vue").default);
@@ -8787,10 +9961,8 @@ axios.interceptors.request.use(function (config) {
 
 axios.interceptors.response.use(function (response) {
   if (response.status !== 200) {
-    console.log('ajax fail');
     app.$Progress.fail();
   } else {
-    console.log('end ajax');
     app.$Progress.finish();
   }
 

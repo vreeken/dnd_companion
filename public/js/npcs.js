@@ -170,7 +170,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
-    data: Object
+    authenticated: Boolean
   },
   data: function data() {
     return {
@@ -192,7 +192,6 @@ __webpack_require__.r(__webpack_exports__);
       lEmail: '',
       lPassword: '',
       base_url: window.location.origin,
-      LOGGED_IN: false,
       showingBurger: false
     };
   },
@@ -3226,7 +3225,7 @@ var render = function() {
             )
           ]),
           _vm._v(" "),
-          _vm.LOGGED_IN
+          _vm.authenticated
             ? _c("div", { staticClass: "navbar-end" }, [
                 _c("a", { staticClass: "navbar-item" }, [_vm._v("Profile")]),
                 _vm._v(" "),
@@ -7671,10 +7670,8 @@ axios.interceptors.request.use(function (config) {
 
 axios.interceptors.response.use(function (response) {
   if (response.status !== 200) {
-    console.log('ajax fail');
     app.$Progress.fail();
   } else {
-    console.log('end ajax');
     app.$Progress.finish();
   }
 
