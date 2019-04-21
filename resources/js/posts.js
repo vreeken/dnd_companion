@@ -19,6 +19,8 @@ require('./bootstrap');
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
 //Vue.component('example-component', require('./components/ExampleComponent.vue').default);
+Vue.component('auth', require('./components/auth/Auth.vue').default);
+
 Vue.component('main-view', require('./components/Main.vue').default);
 Vue.component('posts', require('./components/Posts.vue').default);
 Vue.component('post', require('./components/Post.vue').default);
@@ -76,11 +78,9 @@ axios.interceptors.request.use(config => {
 // before a response is returned stop vue-progressbar
 axios.interceptors.response.use(response => {
 	if (response.status !== 200) {
-		console.log('ajax fail');
 		app.$Progress.fail();
 	}
 	else {
-		console.log('end ajax');
 		app.$Progress.finish();
 	}
 	return response;
