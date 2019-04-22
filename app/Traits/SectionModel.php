@@ -62,6 +62,9 @@ trait SectionModel {
 		//		Then creating a list of random ids, client side, and grab from there
 		//		Another option is to just grab random ids, but if they are deleted, then we just return 9 instead of 10 entries
 		//		Another option is to live with the slow order by RAND(), but to pre-fetch everything so that it doesn't seem slow to the user
+		//
+		//		Another option is to use Redis for caching, specifically caching the ids in their respective orders (order by rand, upvotes, date, etc)
+		//			and using WHERE IN [next set of ids], and update that each day. This keeps comment count and up/downvotes current. BUT this may not be worth the gain
 
 		
 
@@ -86,7 +89,7 @@ trait SectionModel {
 				$WHERE_RAW = self::$POST_TABLE . '.id IN (SELECT `id` FROM (SELECT `id` FROM `' . self::$POST_TABLE . '` ORDER BY RAND(' . $seed . ') LIMIT ' . $qty . ' OFFSET ' . ($page * $qty) . ') t)';
 				break;
 			case 'uv':
-				//Upvotes, Descending (Upvotes)			
+				//Upvotes, Descending (Upvotes)
 				$ORDER_BY_QUERY = '(upvotes - downvotes) DESC';
 				break;
 			case 'dv':
