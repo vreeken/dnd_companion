@@ -17,6 +17,10 @@ html,body {
 }
 */
 
+.pre {
+  white-space: pre-wrap;
+}
+
 .npc-list > .button {
   height: auto !important;
   white-space: normal !important;
