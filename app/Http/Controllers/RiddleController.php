@@ -28,6 +28,6 @@ class RiddleController extends Controller {
 		$post->riddle = $request->input('riddle');
         $post->answer = $request->input('answer');
 
-		return $this->submitPostBase($post, $postVote, $request);
+		return $this->_submitPost($post, $postVote, $request);
 	}
 }
