@@ -1,7 +1,7 @@
 <template>
 	<div>
-		<div class="post-title">
-			<div>{{ post.riddle }}</div>
+		<div class="post-title pre">
+			{{post.riddle}}
 		</div>
 		<div v-if="!post.minimized" class="post-description">
 			<div v-if="post.revealed" class="description riddle" @click="post.revealed=false">
