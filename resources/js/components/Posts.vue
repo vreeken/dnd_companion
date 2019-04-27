@@ -52,6 +52,8 @@
 </template>
 
 <script>
+	import { EventBus } from './eventbus/EventBus.js';
+
 export default {
 	filters: {
 		fromNow: function(v) {
@@ -73,6 +75,14 @@ export default {
 		return {
 			postTypeListview: this.componentPostType + '-listview'
 		}
+	},
+	mounted: function() {
+		EventBus.$on('postLogin', () => {
+			window.location.reload();
+		});
+		EventBus.$on('postRegister', () => {
+			window.location.reload();
+		});
 	},
 	computed: {
 				
