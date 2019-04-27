@@ -846,7 +846,7 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       postType: POST_TYPE_PRETTY,
-      newPost: null
+      newPost: {}
     };
   },
   computed: {},
@@ -1265,7 +1265,7 @@ __webpack_require__.r(__webpack_exports__);
       return t;
     },
     nl2br: function nl2br(t) {
-      return t.replace(/(?:\r\n|\r|\n)/g, "<br />");
+      return t.replace(/(?:\r\n|\r|\n|\\r\\n|\\r|\\n)/g, "<br />");
     }
   },
   props: {
@@ -2960,6 +2960,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   extends: _ViewBase_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
@@ -3028,6 +3030,11 @@ __webpack_require__.r(__webpack_exports__);
     return {};
   },
   computed: {},
+  mounted: function mounted() {
+    this.newPost.riddleError = this.newPost.answerError = this.newPost.ajaxError = "";
+    this.newPost.riddle = "";
+    this.newPost.answer = "";
+  },
   methods: {
     submitPost: function submitPost() {
       //Init newPost error values to blank
@@ -7597,7 +7604,11 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", [
     _c("div", { staticClass: "post-title" }, [
-      _c("div", [_vm._v(_vm._s(_vm.post.riddle))])
+      _c("div", [_vm._v(_vm._s(_vm._f("nl2br")(_vm.post.riddle)))]),
+      _vm._v(" "),
+      _c("div", { staticStyle: { "white-space": "pre-wrap" } }, [
+        _vm._v(_vm._s(_vm.post.riddle))
+      ])
     ]),
     _vm._v(" "),
     !_vm.post.minimized
@@ -7677,10 +7688,12 @@ var render = function() {
               )
             ]),
             _vm._v(" "),
-            _vm.post.riddleError.length > 0
+            _vm.newPost.riddleError.length > 0
               ? _c("div", { staticClass: "error-field" }, [
                   _vm._v(
-                    "\n\t\t\t\t\t" + _vm._s(_vm.post.riddleError) + "\n\t\t\t\t"
+                    "\n\t\t\t\t\t" +
+                      _vm._s(_vm.newPost.riddleError) +
+                      "\n\t\t\t\t"
                   )
                 ])
               : _vm._e(),
@@ -7692,8 +7705,8 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.post.riddle,
-                      expression: "post.riddle"
+                      value: _vm.newPost.riddle,
+                      expression: "newPost.riddle"
                     }
                   ],
                   staticClass: "textarea is-large",
@@ -7704,23 +7717,25 @@ var render = function() {
                     rows: "5",
                     autofocus: ""
                   },
-                  domProps: { value: _vm.post.riddle },
+                  domProps: { value: _vm.newPost.riddle },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
-                      _vm.$set(_vm.post, "riddle", $event.target.value)
+                      _vm.$set(_vm.newPost, "riddle", $event.target.value)
                     }
                   }
                 })
               ])
             ]),
             _vm._v(" "),
-            _vm.post.answerError.length > 0
+            _vm.newPost.answerError.length > 0
               ? _c("div", { staticClass: "error-field" }, [
                   _vm._v(
-                    "\n\t\t\t\t\t" + _vm._s(_vm.post.answerError) + "\n\t\t\t\t"
+                    "\n\t\t\t\t\t" +
+                      _vm._s(_vm.newPost.answerError) +
+                      "\n\t\t\t\t"
                   )
                 ])
               : _vm._e(),
@@ -7732,8 +7747,8 @@ var render = function() {
                     {
                       name: "model",
                       rawName: "v-model",
-                      value: _vm.post.answer,
-                      expression: "post.answer"
+                      value: _vm.newPost.answer,
+                      expression: "newPost.answer"
                     }
                   ],
                   staticClass: "input is-large",
@@ -7742,13 +7757,13 @@ var render = function() {
                     type: "text",
                     placeholder: "Answer"
                   },
-                  domProps: { value: _vm.post.answer },
+                  domProps: { value: _vm.newPost.answer },
                   on: {
                     input: function($event) {
                       if ($event.target.composing) {
                         return
                       }
-                      _vm.$set(_vm.post, "answer", $event.target.value)
+                      _vm.$set(_vm.newPost, "answer", $event.target.value)
                     }
                   }
                 })
@@ -7768,10 +7783,12 @@ var render = function() {
               [_vm._v("\n\t\t\t\t\tSubmit\n\t\t\t\t")]
             ),
             _vm._v(" "),
-            _vm.post.ajaxError.length > 0
+            _vm.newPost.ajaxError.length > 0
               ? _c("div", { staticClass: "error-field" }, [
                   _vm._v(
-                    "\n\t\t\t\t\t" + _vm._s(_vm.post.ajaxError) + "\n\t\t\t\t"
+                    "\n\t\t\t\t\t" +
+                      _vm._s(_vm.newPost.ajaxError) +
+                      "\n\t\t\t\t"
                   )
                 ])
               : _vm._e()
