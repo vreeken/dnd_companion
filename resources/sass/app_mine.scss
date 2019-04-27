@@ -10,7 +10,9 @@ html,body {
 	width: 100%;
 }
 */
-
+.pre {
+	white-space: pre-wrap;
+}
 .npc-list > .button {
 	height: auto !important;
 	white-space: normal !important;
