@@ -784,14 +784,13 @@ export default {
 			if (this.ajaxingShowExternalImages) {
 				return;
 			}
-
-			this.showExternalImages=!this.showExternalImages;
+			
 			this.ajaxingShowExternalImages=true;
 
 			const _this = this;
 			axios.post(SAVE_OPTIONS_URL, {
 				option: 'showExternalImages',
-				value: _this.showExternalImages,
+				value: !this.showExternalImages,
 			}, config)
 				.then(function(response) {
 
