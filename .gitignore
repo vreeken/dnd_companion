@@ -12,3 +12,4 @@ npm-debug.log
 online.env
 /gitignore
 /public/**/*.psd
+/public/maps/*
