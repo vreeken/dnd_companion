@@ -7,7 +7,7 @@ export default {
 	data: function() {
 		return {
 			postType: POST_TYPE_PRETTY,
-			newPost: null,
+			newPost: {},
 		}
 	},
 	computed: {
