@@ -11,7 +11,7 @@ export default {
     				return t;
 		},
 		nl2br: function(t) {
-			return t.replace(/(?:\r\n|\r|\n)/g, "<br />")
+			return t.replace(/(?:\r\n|\r|\n|\\r\\n|\\r|\\n)/g, "<br />")
 		},
 	},
 	props: {
