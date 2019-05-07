@@ -24,6 +24,7 @@
 					-->
 				</div>
 			</div>
+			<a class="navbar-item" href="https://play.google.com/store/apps/details?id=com.mpvreeken.rpgcompanion" target="_blank"><i class="fab fa-android"></i> Get the app</a>
 		</div>
 		<div class="navbar-end">
 		@if (Auth::check())

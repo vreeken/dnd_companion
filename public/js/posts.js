@@ -2960,8 +2960,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   extends: _ViewBase_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
@@ -7603,12 +7601,8 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("div", { staticClass: "post-title" }, [
-      _c("div", [_vm._v(_vm._s(_vm._f("nl2br")(_vm.post.riddle)))]),
-      _vm._v(" "),
-      _c("div", { staticStyle: { "white-space": "pre-wrap" } }, [
-        _vm._v(_vm._s(_vm.post.riddle))
-      ])
+    _c("div", { staticClass: "post-title pre" }, [
+      _vm._v("\n\t\t" + _vm._s(_vm.post.riddle) + "\n\t")
     ]),
     _vm._v(" "),
     !_vm.post.minimized
