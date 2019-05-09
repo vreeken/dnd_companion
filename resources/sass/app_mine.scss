@@ -55,6 +55,12 @@ html,body {
 a.navbar-item img {
     max-height: 2.75rem;
 }
+.navbar-item i {
+	font-size: 150%;
+    margin-right: .2em;
+    position: relative;
+    top: -2px;
+}
 
 .navbar-brand > a.navbar-item {
 	padding: 0 .75rem;
@@ -869,8 +875,15 @@ div.page-transition.page-transitioning {
 		margin: 0 10%;
 		min-width: 200px;
 	}
+	
 }
 
+@media (max-width: 1087px) {
+	.navbar-item i {
+	    position: relative;
+	    top: 1px;
+	}
+}
 @media (max-width: 500px) {
 	.comment-group .comment-group {
 	    margin-left: 0.5rem;
