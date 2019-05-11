@@ -23,6 +23,9 @@ Route::post('auth/login', 'JWTAuthController@postWebLogin');
 Route::get('auth/logout', 'JWTAuthController@getWebLogout');
 Route::post('auth/logout', 'JWTAuthController@postWebLogout');
 Route::post('auth/register', 'JWTAuthController@register');
+Route::get('auth/register', 'JWTAuthController@showRegister');
+
+Route::get('auth/reset-password', 'JWTAuthController@showResetPassword');
 
 
 

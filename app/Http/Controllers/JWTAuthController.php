@@ -154,6 +154,10 @@ class JwtAuthController extends Controller {
 		return response()->json(['success'=>'account_created', 'jwt'=>$token]);
 	}
 
+	public function showRegister(Request $request) {
+		return view('auth.register');
+	}
+
 	public function resendEmail(Request $request) {
 		if (!$request->has('email')) {
 			return response()->json(['error'=>'missing_data'], 400);
