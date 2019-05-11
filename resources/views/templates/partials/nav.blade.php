@@ -48,3 +48,6 @@
 		</div>
 	</div>
 </nav>
+<div class="notification is-warning has-text-centered" style="padding: .5rem 1.5rem;">
+	This site is still under heavy development and you will encounter errors and issues. For a more polished experience try the <a href="https://play.google.com/store/apps/details?id=com.mpvreeken.rpgcompanion" target="_blank"><i class="fab fa-android"></i> android app</a>
+</div>
