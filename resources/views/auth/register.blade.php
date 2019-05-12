@@ -125,7 +125,7 @@
 			document.getElementById('register-btn').classList.add('busy');
 
 			var re = document.querySelector('#remember').checked;
-			/*
+			
 			axios.post("{{ url('auth/register') }}", {
 				username: user,
 				email: em,
@@ -156,7 +156,6 @@
 				e.setAttribute("style", "display:block");
 				document.getElementById('register-btn').classList.remove('busy');
 			});
-			*/
 		}
 
 	</script>
