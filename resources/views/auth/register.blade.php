@@ -55,8 +55,17 @@
 							Remember me
 						</label>
 					</div>
-					<div id="register-btn" class="button is-block is-info is-large is-fullwidth">Create account</div>
+					
+					<div id="register-btn" class="button is-block is-info is-large is-fullwidth">
+						<div class="btn-normal-div">Create Account</div>
+						<div class="btn-busy-div spinner">
+							<div class="bounce1"></div>
+							<div class="bounce2"></div>
+							<div class="bounce3"></div>
+						</div>
+					</div>
 					<div class="error-field" id="register-error" style="display: none;"></div>
+
 				</form>
 			</div>
 			<p class="has-text-grey">
@@ -83,15 +92,15 @@
 			var user = document.getElementById("username").value;
 			var em = document.getElementById("email").value;
 			var pw = document.getElementById("password").value;
-			var pw = document.getElementById("password2").value;
+			var pw2 = document.getElementById("password2").value;
 
-			if (user.length==0) {
+			if (user.length===0) {
 				document.getElementById("username-error").innerHTML = "Please input a username";
 				document.getElementById("username-error").setAttribute("style", "display:block");
 				return;
 			}
 
-			if (em.length==0) {
+			if (em.length===0) {
 				document.getElementById("email-error").innerHTML = "Please input your email";
 				document.getElementById("email-error").setAttribute("style", "display:block");
 				return;
@@ -101,7 +110,7 @@
 				document.getElementById("email-error").setAttribute("style", "display:block");
 				return;
 			}
-			if (pw.length==0) {
+			if (pw.length===0) {
 				document.getElementById("password-error").innerHTML = "Please input your password";
 				document.getElementById("password-error").setAttribute("style", "display:block");
 				return;
@@ -113,8 +122,10 @@
 				return;
 			}
 
-			var re = document.querySelector('#remember').checked;
+			document.getElementById('register-btn').classList.add('busy');
 
+			var re = document.querySelector('#remember').checked;
+			/*
 			axios.post("{{ url('auth/register') }}", {
 				username: user,
 				email: em,
@@ -131,6 +142,7 @@
 					var e = document.getElementById("register-error");
 					e.innerHTML = "An error occurred. Please try again.";
 					e.setAttribute("style", "display:block");
+					document.getElementById('register-btn').classList.remove('busy');
 				}
 			})
 			.catch(function (error) {
@@ -142,7 +154,9 @@
 					e.innerHTML = "An error occurred. Please try again.";
 				}
 				e.setAttribute("style", "display:block");
+				document.getElementById('register-btn').classList.remove('busy');
 			});
+			*/
 		}
 
 	</script>

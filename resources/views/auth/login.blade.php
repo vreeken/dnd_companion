@@ -40,7 +40,15 @@
 							Remember me
 						</label>
 					</div>
-					<div id="login-btn" class="button is-block is-info is-large is-fullwidth">Login</div>
+					
+					<div id="login-btn" class="button is-block is-info is-large is-fullwidth">
+						<div class="btn-normal-div">Login</div>
+						<div class="btn-busy-div spinner">
+							<div class="bounce1"></div>
+							<div class="bounce2"></div>
+							<div class="bounce3"></div>
+						</div>
+					</div>
 					<div class="error-field" id="login-error" style="display: none;"></div>
 				</form>
 			</div>
@@ -84,6 +92,8 @@
 				return;
 			}
 
+			document.getElementById('login-btn').classList.add('busy');
+
 			var re = document.querySelector('#remember').checked;
 
 			axios.post("{{ url('auth/login') }}", {
@@ -101,6 +111,7 @@
 					var e = document.getElementById("login-error");
 					e.innerHTML = "An error occurred. Please try again.";
 					e.setAttribute("style", "display:block");
+					document.getElementById('login-btn').classList.remove('busy');
 				}
 			})
 			.catch(function (error) {
@@ -112,6 +123,7 @@
 					e.innerHTML = "An error occurred. Please try again.";
 				}
 				e.setAttribute("style", "display:block");
+				document.getElementById('login-btn').classList.remove('busy');
 			});
 		}
 

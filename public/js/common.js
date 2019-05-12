@@ -3,16 +3,17 @@ var SITE_URL = "https://dndcompanion.com";
 			Burger Menu Toggle
 ************************************************/
 //This must be executed after Vue()
-/*
+
 var burger = document.querySelector('.burger');
-console.log(burger);
-var menu = document.querySelector('#'+burger.dataset.target);
-burger.addEventListener('click', function() {
-	console.log('burger');
-	burger.classList.toggle('is-active');
-	menu.classList.toggle('is-active');
-});
-*/
+if (burger) {
+	var menu = document.querySelector('#'+burger.dataset.target);
+	burger.addEventListener('click', function() {
+		console.log('burger');
+		burger.classList.toggle('is-active');
+		menu.classList.toggle('is-active');
+	});
+}
+
 
 /************************************************
 			Modal Closing (Global)

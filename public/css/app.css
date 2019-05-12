@@ -851,7 +851,7 @@ div.page-transition.page-transitioning {
   opacity: 0.7;
 }
 
-.btn-busy-div {
+.spinner.btn-busy-div {
   display: none;
 }
 
@@ -859,14 +859,19 @@ div.page-transition.page-transitioning {
   display: none;
 }
 
-.button.busy .btn-busy-div {
+.button.busy {
   display: block;
 }
 
+.busy > .spinner.btn-busy-div {
+  display: flex;
+}
+
 .spinner {
-  margin: 0 auto;
-  width: 70px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .spinner.dark > div {
@@ -874,13 +879,14 @@ div.page-transition.page-transitioning {
 }
 
 .spinner > div {
-  width: 18px;
-  height: 18px;
+  width: 1em;
+  height: 1em;
   background-color: #fff;
   border-radius: 100%;
   display: inline-block;
   -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
   animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  margin: 0 0.2em;
 }
 
 .spinner .bounce1 {
