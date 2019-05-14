@@ -14,7 +14,7 @@ class AddOptionsToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('options', 1024);
+            $table->string('options', 1024)->default("{}");
         });
     }
 
