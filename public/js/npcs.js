@@ -6759,7 +6759,7 @@ window.clone = function (aObject) {
 
   for (k in aObject) {
     v = aObject[k];
-    bObject[k] = _typeof(v) === "object" ? this.clone(v) : v;
+    bObject[k] = _typeof(v) === "object" ? window.clone(v) : v;
   }
 
   return bObject;

@@ -100,7 +100,7 @@ window.clone = function(aObject) {
 	bObject = Array.isArray(aObject) ? [] : {};
 	for (k in aObject) {
 		v = aObject[k];
-		bObject[k] = (typeof v === "object") ? this.clone(v) : v;
+		bObject[k] = (typeof v === "object") ? window.clone(v) : v;
 	}
 	return bObject;
 }
