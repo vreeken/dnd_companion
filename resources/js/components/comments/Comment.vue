@@ -30,9 +30,9 @@
 				</div>
 			</div>
 		</div>
-		<comment-reply v-if="replyToComment == comment" :comment="comment" :reply-to-comment="replyToComment" :post-id="postId" @onReplySuccess="replyToComment=false" @onReplyCancel="replyToComment=false" />
-		<comment-edit v-if="editComment == comment" :comment="comment" :edit-comment="editComment" @onEditSuccess="editComment=false" @onEditCancel="editComment=false" />
-		<comment-list v-if="comment.children.length" :comments="comment.children" :post-id="postId" />
+		<comment-reply v-if="replyToComment == comment" :comment="comment" :reply-to-comment="replyToComment" :post="post" />
+		<comment-edit v-if="editComment == comment" :comment="comment" :edit-comment="editComment"  />
+		<comment-list v-if="comment.children.length" :comments="comment.children" :post="post" />
 	</div>
 </template>
 
@@ -49,7 +49,7 @@ export default {
 	},
 	props: {
 		comment: Object,
-		postId: Number
+		post: Object
 	},
 	data: function() {
 		return {
@@ -63,7 +63,10 @@ export default {
 			
 	},
 	mounted: function() {
-			
+		EventBus.$on('onReplySuccess', () => { this.replyToComment = false; });
+		EventBus.$on('onReplyCancel', () => { this.replyToComment = false; });
+		EventBus.$on('onEditSuccess', () => { this.editComment = false; });
+		EventBus.$on('onEditCancel', () => { this.editComment = false; });
 	},
 	methods: {
 		upvoteComment: function(c) { EventBus.$emit('upvoteComment', c); },

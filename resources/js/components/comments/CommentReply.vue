@@ -6,10 +6,10 @@
 			</div>
 		</div>
 		<div class="comment-buttons">
-			<div class="button is-block is-info is-large submit-btn" @click="replyTo(comment)">
+			<div class="button is-block is-info is-large submit-btn" @click="submitComment()">
 				Submit Reply
 			</div>
-			<div class="button is-block is-dark is-large cancel-btn" @click="$emit('onReplyCancel');">
+			<div class="button is-block is-dark is-large cancel-btn" @click="cancelReply()">
 				Cancel
 			</div>
 		</div>
@@ -20,6 +20,9 @@
 </template>
 
 <script>
+
+import { EventBus } from '../eventbus/EventBus.js';
+
 export default {
 	filters: {
 			
@@ -27,7 +30,7 @@ export default {
 	props: {
 		comment: Object,
 		replyToComment: Object,
-		postId: Number
+		post: Object
 	},
 	data: function() {
 		return {
@@ -41,7 +44,12 @@ export default {
 	computed: {
 			
 	},
-	methods:{
+	methods: {
+		submitComment: function() { EventBus.$emit('postComment', this.post, this.comment.id, this.newComment, this.comment.children); },
+		cancelReply: function() {
+			EventBus.$emit('onReplyCancel');
+		},
+		/*
 		replyTo(comment) {
 			if (!LOGGED_IN) {
 				this.$root.$emit('showLogin', 'You must be logged in to comment');
@@ -60,12 +68,12 @@ export default {
 			//For use within Axios scope to gain access to 'this'
 			var _this = this;
 
-			console.log(this.postId);
+			console.log(this.post.id);
 			console.log(POST_TYPE);
 			//ajax post
 			axios.post(SUBMIT_COMMENT_URL, {
 				post_type: POST_TYPE,
-				post_id: this.postId,
+				post_id: this.post.id,
 				comment: this.newComment.body,
 				parent_id: comment.id
 			}, config)
@@ -114,6 +122,7 @@ export default {
 					_this.newComment.ajaxError = "An error has occurred. Please try again.";
 				});
 		}
+		*/
 	},
 }
 </script>

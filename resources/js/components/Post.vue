@@ -57,7 +57,7 @@
 						{{ newComment.ajaxError }}
 					</div>
 				</div>
-				<comment-list :comments="comments" :post-id="post.id" />
+				<comment-list :comments="comments" :post="post" />
 			</div>
 		</div>
 	</div>

@@ -193,6 +193,7 @@ export default {
 			CURR_BASE_URL: this.data.base_url+'/'+this.data.post_type+'s',
 			SUBMIT_COMMENT_URL: this.data.api_url + '/comments/new',
 			GET_COMMENTS_URL: this.data.api_url + '/comments/get',
+			UPDATE_COMMENT_URL: this.data.api_url + '/comments/update',
 
 			postTypeNewPost: this.data.post_type + '-newpost',
 			sortByMethod: 0,
@@ -249,6 +250,7 @@ export default {
 		EventBus.$on('downvoteComment', (c) => { this.downvoteComment(c) });
 
 		EventBus.$on('postComment', (post_id, parent_id, comment, comments) => { this.postComment(post_id, parent_id, comment, comments) });
+		EventBus.$on('updateComment', (comment, editedComment) => { this.updateComment(comment, editedComment) });
 
 
 		//Init New post
@@ -359,6 +361,11 @@ export default {
 				return;
 			}
 
+			console.log(post);
+			console.log(parent_id);
+			console.log(comment);
+			console.log(comments);
+
 			var _this = this;
 			axios.post(this.SUBMIT_COMMENT_URL, {
 				post_type: this.POST_TYPE,
@@ -386,6 +393,10 @@ export default {
 						comments.unshift(c);
 
 						comment.bodyError = comment.ajaxError = comment.body = "";
+
+						if (parent_id) {
+							EventBus.$emit('onReplySuccess');
+						}
 					}
 					else {
 						//Unknown Error
@@ -400,6 +411,56 @@ export default {
 					//invalid_parameters
 					//db_error
 					_this.newComment.ajaxError = "An error has occurred. Please try again.";
+				});
+		},
+		updateComment: function(comment, editedComment) {
+			console.log(comment);
+			console.log(editedComment);
+			//basic clientside validation
+			if (editedComment.body.length === 0) {
+				comment.bodyError='Please fill out your comment or click delete if you wish to remove your comment';
+				return;
+			}
+			//Reset any errors
+			editedComment.bodyError = editedComment.ajaxError = "";
+
+			//If comment didn't change then return, but still emit success so that parent closes the edit div
+			if (editedComment.body === comment.comment) {
+				EventBus.$emit('onEditSuccess');
+				return;
+			}
+
+			//For use within Axios scope to gain access to 'this'
+			const _this = this;
+
+			//ajax post
+			axios.post(this.UPDATE_COMMENT_URL, {
+				post_type: this.POST_TYPE,
+				comment: editedComment.body,
+				comment_id: comment.id
+			}, config)
+				.then(function(response) {
+					console.log(response);
+					if (response.data.success) {
+						comment.comment = editedComment.body;
+
+						editedComment.bodyError = editedComment.ajaxError = "";
+
+						EventBus.$emit('onEditSuccess');
+					}
+					else {
+						//Unknown Error
+						editedComment.ajaxError="An error has occurred. Please try again.";
+					}
+				})
+				.catch(function(error) {
+					console.log("ERROR");
+					console.log(error);
+					console.log(error.response.headers);
+					console.log(error.response.data);
+					//invalid_parameters
+					//db_error
+					editedComment.ajaxError="An error has occurred. Please try again.";
 				});
 		},
 		/*

@@ -200,6 +200,7 @@ __webpack_require__.r(__webpack_exports__);
       CURR_BASE_URL: this.data.base_url + '/' + this.data.post_type + 's',
       SUBMIT_COMMENT_URL: this.data.api_url + '/comments/new',
       GET_COMMENTS_URL: this.data.api_url + '/comments/get',
+      UPDATE_COMMENT_URL: this.data.api_url + '/comments/update',
       postTypeNewPost: this.data.post_type + '-newpost',
       sortByMethod: 0,
       filterByMethod: 0,
@@ -275,6 +276,9 @@ __webpack_require__.r(__webpack_exports__);
     });
     _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('postComment', function (post_id, parent_id, comment, comments) {
       _this2.postComment(post_id, parent_id, comment, comments);
+    });
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('updateComment', function (comment, editedComment) {
+      _this2.updateComment(comment, editedComment);
     }); //Init New post
 
     this.clearNewPost(); //Listen for the back and forward buttons of the browser
@@ -385,6 +389,11 @@ __webpack_require__.r(__webpack_exports__);
         return;
       }
 
+      console.log(post);
+      console.log(parent_id);
+      console.log(comment);
+      console.log(comments);
+
       var _this = this;
 
       axios.post(this.SUBMIT_COMMENT_URL, {
@@ -411,6 +420,10 @@ __webpack_require__.r(__webpack_exports__);
           };
           comments.unshift(c);
           comment.bodyError = comment.ajaxError = comment.body = "";
+
+          if (parent_id) {
+            _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('onReplySuccess');
+          }
         } else {
           //Unknown Error
           post.newComment.ajaxError = "An error has occurred. Please try again.";
@@ -423,6 +436,52 @@ __webpack_require__.r(__webpack_exports__);
         //db_error
 
         _this.newComment.ajaxError = "An error has occurred. Please try again.";
+      });
+    },
+    updateComment: function updateComment(comment, editedComment) {
+      console.log(comment);
+      console.log(editedComment); //basic clientside validation
+
+      if (editedComment.body.length === 0) {
+        comment.bodyError = 'Please fill out your comment or click delete if you wish to remove your comment';
+        return;
+      } //Reset any errors
+
+
+      editedComment.bodyError = editedComment.ajaxError = ""; //If comment didn't change then return, but still emit success so that parent closes the edit div
+
+      if (editedComment.body === comment.comment) {
+        _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('onEditSuccess');
+        return;
+      } //For use within Axios scope to gain access to 'this'
+
+
+      var _this = this; //ajax post
+
+
+      axios.post(this.UPDATE_COMMENT_URL, {
+        post_type: this.POST_TYPE,
+        comment: editedComment.body,
+        comment_id: comment.id
+      }, config).then(function (response) {
+        console.log(response);
+
+        if (response.data.success) {
+          comment.comment = editedComment.body;
+          editedComment.bodyError = editedComment.ajaxError = "";
+          _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('onEditSuccess');
+        } else {
+          //Unknown Error
+          editedComment.ajaxError = "An error has occurred. Please try again.";
+        }
+      }).catch(function (error) {
+        console.log("ERROR");
+        console.log(error);
+        console.log(error.response.headers);
+        console.log(error.response.data); //invalid_parameters
+        //db_error
+
+        editedComment.ajaxError = "An error has occurred. Please try again.";
       });
     },
 
@@ -1764,7 +1823,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   props: {
     comment: Object,
-    postId: Number
+    post: Object
   },
   data: function data() {
     return {
@@ -1775,7 +1834,22 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   computed: {},
-  mounted: function mounted() {},
+  mounted: function mounted() {
+    var _this = this;
+
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('onReplySuccess', function () {
+      _this.replyToComment = false;
+    });
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('onReplyCancel', function () {
+      _this.replyToComment = false;
+    });
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('onEditSuccess', function () {
+      _this.editComment = false;
+    });
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('onEditCancel', function () {
+      _this.editComment = false;
+    });
+  },
   methods: {
     upvoteComment: function upvoteComment(c) {
       _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('upvoteComment', c);
@@ -1797,6 +1871,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../eventbus/EventBus.js */ "./resources/js/components/eventbus/EventBus.js");
 //
 //
 //
@@ -1819,6 +1894,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {},
   props: {
@@ -1827,55 +1903,20 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      bodyError: false,
-      ajaxError: false,
-      editedComment: this.comment.comment
+      editedComment: {
+        body: this.comment.comment,
+        bodyError: false,
+        ajaxError: ''
+      }
     };
   },
   computed: {},
   methods: {
-    update: function update() {
-      //basic clientside validation
-      if (this.editedComment.length == 0) {
-        this.bodyError = 'Please fill out your comment or click delete if you wish to remove your comment';
-        return;
-      } //Reset any errors
-
-
-      this.bodyError = false;
-      this.ajaxError = false; //If comment didn't change then return, but still emit success so that parent closes the edit div
-
-      if (this.editedComment == this.comment.comment) {
-        this.$emit('onEditSuccess');
-        return;
-      } //For use within Axios scope to gain access to 'this'
-
-
-      var self = this; //ajax post
-
-      axios.post(UPDATE_COMMENT_URL, {
-        post_type: POST_TYPE,
-        comment: self.editedComment,
-        comment_id: self.comment.id
-      }, config).then(function (response) {
-        console.log(response);
-
-        if (response.data.success) {
-          self.comment.comment = self.editedComment;
-          self.$emit('onEditSuccess');
-        } else {
-          //Unknown Error
-          self.ajaxError = "An error has occurred. Please try again.";
-        }
-      }).catch(function (error) {
-        console.log("ERROR");
-        console.log(error);
-        console.log(error.response.headers);
-        console.log(error.response.data); //invalid_parameters
-        //db_error
-
-        self.ajaxError = "An error has occurred. Please try again.";
-      });
+    updateComment: function updateComment() {
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('updateComment', this.comment, this.editedComment);
+    },
+    cancelEdit: function cancelEdit() {
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('onEditCancel');
     }
   }
 });
@@ -1891,17 +1932,19 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../eventbus/EventBus.js */ "./resources/js/components/eventbus/EventBus.js");
 //
 //
 //
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {},
   props: {
     comments: Array,
-    postId: Number
+    post: Object
   },
   data: function data() {
     return {};
@@ -1921,6 +1964,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../eventbus/EventBus.js */ "./resources/js/components/eventbus/EventBus.js");
 //
 //
 //
@@ -1942,12 +1986,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {},
   props: {
     comment: Object,
     replyToComment: Object,
-    postId: Number
+    post: Object
   },
   data: function data() {
     return {
@@ -1960,77 +2005,83 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {},
   methods: {
-    replyTo: function replyTo(comment) {
-      if (!LOGGED_IN) {
-        this.$root.$emit('showLogin', 'You must be logged in to comment');
-        return;
-      } //basic clientside validation
-
-
-      if (this.newComment.body.length == 0) {
-        this.newComment.bodyError = true;
-        return;
-      } //Reset any errors
-
-
-      this.newComment.bodyError = false;
-      this.newComment.ajaxError = ""; //For use within Axios scope to gain access to 'this'
-
-      var _this = this;
-
-      console.log(this.postId);
-      console.log(POST_TYPE); //ajax post
-
-      axios.post(SUBMIT_COMMENT_URL, {
-        post_type: POST_TYPE,
-        post_id: this.postId,
-        comment: this.newComment.body,
-        parent_id: comment.id
-      }, config).then(function (response) {
-        console.log(response);
-
-        if (response.data.success) {
-          //Create a new basic 'comment' with the newly submitted into and add to the parent comments list of children
-          var c = {
-            children: [],
-            comment: _this.newComment.body,
-            created_at: moment().format('YYYY-MM-DD HH:mm:ssZ'),
-            downvotes: 0,
-            upvotes: 1,
-            id: response.data.new_id,
-            parent_id: comment.id,
-            updated_at: moment().format('YYYY-MM-DD HH:mm:ssZ'),
-            username: USERNAME,
-            voted: 1 //Add to 0 position of parent's children comments so that it show up on top (near the submit form), 
-            //if reloaded their comment will be at the end of the list, but this makes things more intuitive
-
-          };
-
-          _this.comment.children.unshift(c); //unset the new comment data
-
-
-          _this.newComment = {
-            body: '',
-            bodyError: false,
-            ajaxError: '' //Emit event to let parent (comment group) know the form is done
-
-          };
-
-          _this.$emit('onReplySuccess');
-        } else {
-          //Unknown Error
-          _this.newComment.ajaxError = "An error has occurred. Please try again.";
-        }
-      }).catch(function (error) {
-        console.log("ERROR");
-        console.log(error);
-        console.log(error.response.headers);
-        console.log(error.response.data); //invalid_parameters
-        //db_error
-
-        _this.newComment.ajaxError = "An error has occurred. Please try again.";
-      });
+    submitComment: function submitComment() {
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('postComment', this.post, this.comment.id, this.newComment, this.comment.children);
+    },
+    cancelReply: function cancelReply() {
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('onReplyCancel');
     }
+    /*
+    replyTo(comment) {
+    	if (!LOGGED_IN) {
+    		this.$root.$emit('showLogin', 'You must be logged in to comment');
+    		return;
+    	}
+    		
+    	//basic clientside validation
+    	if (this.newComment.body.length==0) {
+    		this.newComment.bodyError=true;
+    		return;
+    	}
+    	//Reset any errors
+    	this.newComment.bodyError=false;
+    	this.newComment.ajaxError="";
+    			//For use within Axios scope to gain access to 'this'
+    	var _this = this;
+    			console.log(this.post.id);
+    	console.log(POST_TYPE);
+    	//ajax post
+    	axios.post(SUBMIT_COMMENT_URL, {
+    		post_type: POST_TYPE,
+    		post_id: this.post.id,
+    		comment: this.newComment.body,
+    		parent_id: comment.id
+    	}, config)
+    		.then(function(response) {
+    			console.log(response);
+    			if (response.data.success) {
+    				//Create a new basic 'comment' with the newly submitted into and add to the parent comments list of children
+    				var c = {
+    					children: [],
+    					comment: _this.newComment.body,
+    					created_at: moment().format('YYYY-MM-DD HH:mm:ssZ'),
+    					downvotes: 0,
+    					upvotes: 1,
+    					id: response.data.new_id,
+    					parent_id: comment.id,
+    					updated_at: moment().format('YYYY-MM-DD HH:mm:ssZ'),
+    					username: USERNAME,
+    					voted: 1
+    				}
+    				//Add to 0 position of parent's children comments so that it show up on top (near the submit form), 
+    				//if reloaded their comment will be at the end of the list, but this makes things more intuitive
+    				_this.comment.children.unshift(c);
+    						//unset the new comment data
+    				_this.newComment = {
+    					body: '',
+    					bodyError: false,
+    					ajaxError: ''
+    				}
+    						//Emit event to let parent (comment group) know the form is done
+    				_this.$emit('onReplySuccess');
+    			}
+    			else {
+    				//Unknown Error
+    				_this.newComment.ajaxError = "An error has occurred. Please try again.";
+    			}
+    		})
+    		.catch(function(error) {
+    			console.log("ERROR");
+    			console.log(error);
+    			console.log(error.response.headers);
+    			console.log(error.response.data);
+    			//invalid_parameters
+    			//db_error
+    			_this.newComment.ajaxError = "An error has occurred. Please try again.";
+    		});
+    }
+    */
+
   }
 });
 
@@ -4545,7 +4596,7 @@ var render = function() {
           ]),
           _vm._v(" "),
           _c("comment-list", {
-            attrs: { comments: _vm.comments, "post-id": _vm.post.id }
+            attrs: { comments: _vm.comments, post: _vm.post }
           })
         ],
         1
@@ -5705,36 +5756,20 @@ var render = function() {
             attrs: {
               comment: _vm.comment,
               "reply-to-comment": _vm.replyToComment,
-              "post-id": _vm.postId
-            },
-            on: {
-              onReplySuccess: function($event) {
-                _vm.replyToComment = false
-              },
-              onReplyCancel: function($event) {
-                _vm.replyToComment = false
-              }
+              post: _vm.post
             }
           })
         : _vm._e(),
       _vm._v(" "),
       _vm.editComment == _vm.comment
         ? _c("comment-edit", {
-            attrs: { comment: _vm.comment, "edit-comment": _vm.editComment },
-            on: {
-              onEditSuccess: function($event) {
-                _vm.editComment = false
-              },
-              onEditCancel: function($event) {
-                _vm.editComment = false
-              }
-            }
+            attrs: { comment: _vm.comment, "edit-comment": _vm.editComment }
           })
         : _vm._e(),
       _vm._v(" "),
       _vm.comment.children.length
         ? _c("comment-list", {
-            attrs: { comments: _vm.comment.children, "post-id": _vm.postId }
+            attrs: { comments: _vm.comment.children, post: _vm.post }
           })
         : _vm._e()
     ],
@@ -5764,7 +5799,9 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _vm.bodyError ? _c("span", [_vm._v(_vm._s(_vm.bodyError))]) : _vm._e(),
+    _vm.editedComment.bodyError.length
+      ? _c("span", [_vm._v(_vm._s(_vm.editedComment.bodyError))])
+      : _vm._e(),
     _vm._v(" "),
     _c("div", { staticClass: "field" }, [
       _c("div", { staticClass: "control" }, [
@@ -5773,20 +5810,20 @@ var render = function() {
             {
               name: "model",
               rawName: "v-model",
-              value: _vm.editedComment,
-              expression: "editedComment"
+              value: _vm.editedComment.body,
+              expression: "editedComment.body"
             }
           ],
           staticClass: "child-comment-body textarea",
-          class: { error: _vm.bodyError },
+          class: { error: _vm.editedComment.bodyError.length },
           attrs: { type: "text", placeholder: "Comment", rows: "2" },
-          domProps: { value: _vm.editedComment },
+          domProps: { value: _vm.editedComment.body },
           on: {
             input: function($event) {
               if ($event.target.composing) {
                 return
               }
-              _vm.editedComment = $event.target.value
+              _vm.$set(_vm.editedComment, "body", $event.target.value)
             }
           }
         })
@@ -5800,7 +5837,7 @@ var render = function() {
           staticClass: "button is-block is-info is-large submit-btn",
           on: {
             click: function($event) {
-              return _vm.update()
+              return _vm.updateComment()
             }
           }
         },
@@ -5813,7 +5850,7 @@ var render = function() {
           staticClass: "button is-block is-dark is-large cancel-btn",
           on: {
             click: function($event) {
-              return _vm.$emit("onEditCancel")
+              return _vm.cancelEdit()
             }
           }
         },
@@ -5821,9 +5858,9 @@ var render = function() {
       )
     ]),
     _vm._v(" "),
-    _vm.ajaxError
+    _vm.editedComment.ajaxError.length
       ? _c("div", { staticClass: "error-field" }, [
-          _vm._v("\n\t\t" + _vm._s(_vm.ajaxError) + "\n\t")
+          _vm._v("\n\t\t" + _vm._s(_vm.editedComment.ajaxError) + "\n\t")
         ])
       : _vm._e()
   ])
@@ -5856,7 +5893,7 @@ var render = function() {
     _vm._l(_vm.comments, function(comment) {
       return _c("comment", {
         key: comment.id,
-        attrs: { comment: comment, "post-id": _vm.postId }
+        attrs: { comment: comment, post: _vm.post }
       })
     }),
     1
@@ -5919,7 +5956,7 @@ var render = function() {
           staticClass: "button is-block is-info is-large submit-btn",
           on: {
             click: function($event) {
-              return _vm.replyTo(_vm.comment)
+              return _vm.submitComment()
             }
           }
         },
@@ -5932,7 +5969,7 @@ var render = function() {
           staticClass: "button is-block is-dark is-large cancel-btn",
           on: {
             click: function($event) {
-              return _vm.$emit("onReplyCancel")
+              return _vm.cancelReply()
             }
           }
         },
