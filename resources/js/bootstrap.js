@@ -110,8 +110,13 @@ window.fromNow = function(date) {
 	var thresholds = [46656000000,27648000000,3888000000,2246400000,129600000,79200000,5400000,2700000,90000,46000,0];
 	var modifiers = [31536000000,1,2592000000,1,86400000,1,3600000,1,60000,1,1];
 	var outputs = [' years ago','a year ago',' months ago','a month ago',' days ago','a day ago',' hours ago','an hour ago',' minutes ago','a minute ago','just now'];
+	
+	//If date doesn't have 'z' on the end, then append it
+	date = date.substr(date.length - 1) === 'z' ? date : date+'z';
+
 	var d = new Date(date);
 	var elapsed = Math.round(new Date() - d);
+	
 	for (var i=0; i<thresholds.length; i++) {
 		if (elapsed >= thresholds[i]) {
 			if (modifiers[i]>1) {
