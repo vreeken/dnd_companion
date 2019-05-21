@@ -199,6 +199,7 @@ __webpack_require__.r(__webpack_exports__);
       SORT_BY_METHODS: ["r", "uv", "dv", "dd", "da"],
       CURR_BASE_URL: this.data.base_url + '/' + this.data.post_type + 's',
       SUBMIT_COMMENT_URL: this.data.api_url + '/comments/new',
+      GET_COMMENTS_URL: this.data.api_url + '/comments/get',
       postTypeNewPost: this.data.post_type + '-newpost',
       sortByMethod: 0,
       filterByMethod: 0,
@@ -805,7 +806,7 @@ __webpack_require__.r(__webpack_exports__);
 
       var _this = this;
 
-      axios.post(GET_COMMENTS_URL, {
+      axios.post(this.GET_COMMENTS_URL, {
         post_type: POST_TYPE,
         post_id: this.currPost.id
       }, config).then(function (response) {
