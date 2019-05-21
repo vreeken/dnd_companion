@@ -351,7 +351,7 @@ export default {
 			}
 
 			//clear any previous errors
-			this.newComment.bodyError = this.newComment.ajaxError = "";
+			comment.bodyError = comment.ajaxError = "";
 
 			//Client-side validation, make sure there is a body
 			if (comment.body.length === 0) {

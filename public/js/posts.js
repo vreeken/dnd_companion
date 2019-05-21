@@ -378,7 +378,7 @@ __webpack_require__.r(__webpack_exports__);
       } //clear any previous errors
 
 
-      this.newComment.bodyError = this.newComment.ajaxError = ""; //Client-side validation, make sure there is a body
+      comment.bodyError = comment.ajaxError = ""; //Client-side validation, make sure there is a body
 
       if (comment.body.length === 0) {
         comment.bodyError = "Please include content in your comment";
