@@ -17,6 +17,8 @@
 
 @section('footer_scripts')
 <script>
+	var config = {};
+	/*
 	var POST_TYPE = '{{ $data['post_type'] }}';
 	//As of now this is redundant, but might need to be a little different
     var COMPONENT_POST_TYPE = '{{ $data['post_type'] }}';
@@ -26,13 +28,14 @@
     var GET_URL = '{{ url('api/' . $data['post_type'] . 's') }}';
 
 	//Default config for Axios, send jwt if user is logged in
-    var config = {};
+
+    */
 @if (Auth::check())
-    var USER = JSON.parse(localStorage.getItem('user'));
-	if (USER) { config.headers = {'Authorization': "Bearer " + USER.jwt} }
-	var LOGGED_IN=true;
+    //var USER = JSON.parse(localStorage.getItem('user'));
+	//if (USER) { config.headers = {'Authorization': "Bearer " + USER.jwt} }
+	//var LOGGED_IN=true;
 @else
-	var LOGGED_IN=false;
+	//var LOGGED_IN=false;
 @endif
 
 		/***************************************
@@ -49,7 +52,7 @@
 				go to hooks/1, close/back to main hooks list, change filter to "saved" and it crashes
 
 		****************************************/
-
+/*
 			var SAVE_OPTIONS_URL = '{{ url('api/save-options') }}';
 			var REPORT_URL = '{{ url('api/report') }}';
 			var BOOKMARK_URL = '{{ url('api/bookmark') }}';
@@ -64,13 +67,13 @@
 			var D20_ANIM_DONE = false;
 			var VUE_LOADED = false;
 			var USERNAME = '{{ Auth::user() ? Auth::user()->username : '' }}';
-
+*/
 	@if (isset($data['post'], $data['comments']))
-			var URL_POST = {!! json_encode($data['post']) !!};
-			var URL_COMMENTS = {!! json_encode($data['comments']) !!};
+//			var URL_POST = {!! json_encode($data['post']) !!};
+//			var URL_COMMENTS = {!! json_encode($data['comments']) !!};
 	@else
-			var URL_POST = null;
-			var URL_COMMENTS = null;
+//			var URL_POST = null;
+//			var URL_COMMENTS = null;
 	@endif
 
 

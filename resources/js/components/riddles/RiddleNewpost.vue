@@ -7,29 +7,29 @@
 					<div class="modal__title">
 						Submit a new {{ postType }}
 					</div>
-					<div v-if="post.riddleError.length>0" class="error-field">
-						{{ post.riddleError }}
+					<div v-if="newPost.riddleError.length>0" class="error-field">
+						{{ newPost.riddleError }}
 					</div>
 					<div class="field">
 						<div class="control">
-							<textarea id="post-body" v-model="post.riddle" class="textarea is-large" type="text" placeholder="Riddle" rows="5" autofocus="" />
+							<textarea id="post-body" v-model="newPost.riddle" class="textarea is-large" type="text" placeholder="Riddle" rows="5" autofocus="" />
 						</div>
 					</div>
 
-					<div v-if="post.answerError.length>0" class="error-field">
-						{{ post.answerError }}
+					<div v-if="newPost.answerError.length>0" class="error-field">
+						{{ newPost.answerError }}
 					</div>
 					<div class="field">
 						<div class="control">
-							<input id="post-title" v-model="post.answer" class="input is-large" type="text" placeholder="Answer">
+							<input id="post-title" v-model="newPost.answer" class="input is-large" type="text" placeholder="Answer">
 						</div>
 					</div>
 
 					<div class="button is-block is-info is-large is-fullwidth" @click="submitPost()">
 						Submit
 					</div>
-					<div v-if="post.ajaxError.length>0" class="error-field">
-						{{ post.ajaxError }}
+					<div v-if="newPost.ajaxError.length>0" class="error-field">
+						{{ newPost.ajaxError }}
 					</div>
 				</div>
 			</div>
@@ -47,11 +47,16 @@ export default {
 	extends: NewPostBase,
 	data: function() {
 		return {
-				
+			
 		}
 	},
 	computed: {
 			
+	},
+	mounted: function() {
+		this.newPost.riddleError = this.newPost.answerError = this.newPost.ajaxError = "";
+		this.newPost.riddle = "";
+		this.newPost.answer = "";
 	},
 	methods:{
 		submitPost: function() {

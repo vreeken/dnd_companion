@@ -9,6 +9,7 @@
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./eventbus/EventBus.js */ "./resources/js/components/eventbus/EventBus.js");
 //
 //
 //
@@ -182,6 +183,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {},
   props: {
@@ -190,9 +192,14 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       //registerTitle: REGISTER_TITLE,
-      postType: POST_TYPE_PRETTY,
-      componentPostType: COMPONENT_POST_TYPE,
-      postTypeNewPost: COMPONENT_POST_TYPE + '-newpost',
+      VOTE_URL: this.data.api_url + '/vote',
+      POST_TYPE_PRETTY: this.data.post_type_pretty,
+      POST_TYPE: this.data.post_type,
+      GET_URL: this.data.api_url + '/' + this.data.post_type + 's',
+      SORT_BY_METHODS: ["r", "uv", "dv", "dd", "da"],
+      CURR_BASE_URL: this.data.base_url + '/' + this.data.post_type + 's',
+      SUBMIT_COMMENT_URL: this.data.api_url + '/comments/new',
+      postTypeNewPost: this.data.post_type + '-newpost',
       sortByMethod: 0,
       filterByMethod: 0,
       sortByRandomSeed: Math.floor(Math.random() * 1000000),
@@ -213,8 +220,7 @@ __webpack_require__.r(__webpack_exports__);
       reportPost: null,
       reportComment: null,
       reportResult: null,
-      base_url: BASE_URL,
-      showExternalImages: this.data.show_external_images == 'true',
+      showExternalImages: this.data.show_external_images === 'true',
       ajaxingShowExternalImages: false,
       noMorePosts: false
     };
@@ -223,43 +229,52 @@ __webpack_require__.r(__webpack_exports__);
     var _this2 = this;
 
     //Event Listeners
-    this.$root.$on('upvote', function (p) {
-      _this2.upvote(p);
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('upvotePost', function (p) {
+      _this2.upvotePost(p);
     });
-    this.$root.$on('downvote', function (p) {
-      _this2.downvote(p);
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('downvotePost', function (p) {
+      _this2.downvotePost(p);
     });
-    this.$root.$on('expandPost', function (p) {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('expandPost', function (p) {
       _this2.expandPost(p);
     });
-    this.$root.$on('viewPost', function (p, b) {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('viewPost', function (p, b) {
       _this2.viewPost(p, b);
     });
-    this.$root.$on('unsavePost', function (p) {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('unsavePost', function (p) {
       _this2.unsavePost(p);
     });
-    this.$root.$on('savePost', function (p) {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('savePost', function (p) {
       _this2.savePost(p);
     });
-    this.$root.$on('sharePost', function (p) {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('sharePost', function (p) {
       _this2.sharePost = p;
     });
-    this.$root.$on('reportPost', function (p) {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('reportPost', function (p) {
       _this2.reportPost = p;
     });
-    this.$root.$on('toggleMinimized', function (p) {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('toggleMinimized', function (p) {
       _this2.toggleMinimized(p);
     });
-    this.$root.$on('closePost', function () {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('closePost', function () {
       _this2.closePost();
     });
-    this.$root.$on('newPostCreated', function (p) {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('newPostCreated', function (p) {
       _this2.newPostCreated(p);
     });
-    this.$root.$on('showLogin', function (t) {
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('showLogin', function (t) {
       _this2.showLogin(t);
     }); //this.$on('hideNewPost', () => { this.hideNewPost(); });
-    //Init New post
+
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('upvoteComment', function (c) {
+      _this2.upvoteComment(c);
+    });
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('downvoteComment', function (c) {
+      _this2.downvoteComment(c);
+    });
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('postComment', function (post_id, parent_id, comment, comments) {
+      _this2.postComment(post_id, parent_id, comment, comments);
+    }); //Init New post
 
     this.clearNewPost(); //Listen for the back and forward buttons of the browser
 
@@ -269,20 +284,20 @@ __webpack_require__.r(__webpack_exports__);
       _this.onNavigate();
     }, false); //Check if we get a post's data from the server from the url
 
-    if (URL_POST && URL_COMMENTS) {
+    if (this.data.post && this.data.comments) {
       //We got a post so make it the current post and show it
-      this.currPost = this.preFormatPost(URL_POST);
+      this.currPost = this.preFormatPost(this.data.post);
       this.showingPost = true; //Push new url to history, so the user can click back from here and get to a list of other posts
 
       history.replaceState({
-        id: this.base_url
-      }, null, this.base_url); //history.pushState({id: this.base_url}, null, this.base_url);
+        id: this.CURR_BASE_URL
+      }, null, this.CURR_BASE_URL); //history.pushState({id: this.CURR_BASE_URL}, null, this.CURR_BASE_URL);
 
       history.pushState({
-        id: this.base_url + '/' + this.currPost.id
-      }, null, this.base_url + '/' + this.currPost.id); //Sort the comments given to us by the server
+        id: this.CURR_BASE_URL + '/' + this.currPost.id
+      }, null, this.CURR_BASE_URL + '/' + this.currPost.id); //Sort the comments given to us by the server
 
-      this.processComments(URL_COMMENTS);
+      this.processComments(this.data.comments);
     } //Get some posts to show to the user
 
 
@@ -291,14 +306,125 @@ __webpack_require__.r(__webpack_exports__);
     if (window.location.hash === '#new') {
       history.replaceState({
         id: '/'
-      }, null, this.base_url);
+      }, null, this.CURR_BASE_URL);
       history.pushState({
         id: 'new_post'
-      }, null, this.base_url + '#new');
+      }, null, this.CURR_BASE_URL + '#new');
       this.showingNewPost = true;
     }
   },
   methods: {
+    upvoteComment: function upvoteComment(c) {
+      this.voteOnComment(1, c);
+    },
+    downvoteComment: function downvoteComment(c) {
+      this.voteOnComment(0, c);
+    },
+    voteOnComment: function voteOnComment(v, c) {
+      if (!this.checkLoggedIn("You must be logged in to vote")) {
+        return;
+      }
+
+      if (v !== 0 && v !== 1) {
+        return;
+      }
+
+      var _this = this; //ajax post
+
+
+      axios.post(this.VOTE_URL, {
+        type: this.POST_TYPE + "_comment",
+        id: c.id,
+        vote: v
+      }, config).then(function (response) {
+        if (response.data.success) {
+          if (response.data.success === "vote_saved") {
+            if (v === 1) {
+              c.upvotes += 1;
+            } else if (v === 0) {
+              c.downvotes += 1;
+            }
+
+            c.voted = v;
+          } else if (response.data.success === "vote_unchanged") {} else if (response.data.success === "vote_updated") {
+            if (v === 1) {
+              c.upvotes += 1;
+              c.downvotes -= 1;
+            } else if (v === 0) {
+              c.downvotes += 1;
+              c.upvotes -= 1;
+            }
+
+            c.voted = v;
+          }
+        } else {//Unknown Error
+          //_this.newComment.ajaxError = "An error has occurred. Please try again.";
+        }
+      }).catch(function (error) {
+        console.log("ERROR");
+        console.log(error);
+        console.log(error.response.headers);
+        console.log(error.response.data); //invalid_parameters
+        //db_error
+        //_this.newComment.ajaxError = "An error has occurred. Please try again.";
+      });
+    },
+    postComment: function postComment(post, parent_id, comment, comments) {
+      //Make sure user is logged in
+      if (!this.$store.state.loggedIn) {
+        _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('showLogin', 'You must be logged in to comment');
+        return;
+      } //clear any previous errors
+
+
+      this.newComment.bodyError = this.newComment.ajaxError = ""; //Client-side validation, make sure there is a body
+
+      if (comment.body.length === 0) {
+        comment.bodyError = "Please include content in your comment";
+        return;
+      }
+
+      var _this = this;
+
+      axios.post(this.SUBMIT_COMMENT_URL, {
+        post_type: this.POST_TYPE,
+        post_id: post.id,
+        comment: comment.body,
+        parent_id: parent_id
+      }, config).then(function (response) {
+        if (response.data.success) {
+          //Create an artificial "comment" object formatted as you would get from the server based off the user's newly submitted comment
+          var now = new Date().toISOString();
+          var c = {
+            children: [],
+            comment: comment.body,
+            created_at: now,
+            downvotes: 0,
+            upvotes: 1,
+            id: response.data.new_id,
+            parent_id: null,
+            updated_at: now,
+            username: _this.$store.state.username,
+            voted: 1 //Add our new comment (now correctly formatted) to the top of our list of comments
+
+          };
+          comments.unshift(c);
+          comment.bodyError = comment.ajaxError = comment.body = "";
+        } else {
+          //Unknown Error
+          post.newComment.ajaxError = "An error has occurred. Please try again.";
+        }
+      }).catch(function (error) {
+        console.log("ERROR");
+        console.log(error);
+        console.log(error.response.headers);
+        console.log(error.response.data); //invalid_parameters
+        //db_error
+
+        _this.newComment.ajaxError = "An error has occurred. Please try again.";
+      });
+    },
+
     /*
     	hover: () => {
     		this.timer = setTimeout(() => this.showPopover(), 600)
@@ -340,10 +466,10 @@ __webpack_require__.r(__webpack_exports__);
       //immediate: true = immediately add new posts to our current posts, false = add to our prefetchedPosts array
       var _this = this;
 
-      axios.post(window.GET_URL, {
+      axios.post(this.GET_URL, {
         page: this.pageNum,
         filter: this.filterByMethod,
-        method: SORT_BY_METHODS[this.sortByMethod],
+        method: this.SORT_BY_METHODS[this.sortByMethod],
         seed: this.sortByRandomSeed
       }, config).then(function (response) {
         if (response.data && response.data.success) {
@@ -363,16 +489,16 @@ __webpack_require__.r(__webpack_exports__);
           if (_this.posts == null) {
             _this.posts = [];
 
-            if (URL_POST) {
+            if (_this.data.post) {
               //Do we have a post's data provided by the server? If so, add it as the first post before adding newly fetched posts
-              _this.posts.push(_this.preFormatPost(URL_POST));
+              _this.posts.push(_this.preFormatPost(_this.data.post));
             }
           } //Loop through posts retrieved from the server, append some client side vars then add to our current posts array
 
 
           while (response.data.posts.length) {
             //If we happen to come across our url provided post then don't add it to the list, because we already have it
-            if (URL_POST && response.data.posts[0].id === URL_POST.id) {
+            if (_this.data.post && response.data.posts[0].id === _this.data.post.id) {
               var found = false;
 
               for (var i = 0; i < _this.posts.length; i++) {
@@ -451,20 +577,20 @@ __webpack_require__.r(__webpack_exports__);
     expandPost: function expandPost(p) {
       if (p.minimized) p.minimized = false;
     },
-    upvote: function upvote(p) {
-      this.vote(p, 1);
+    upvotePost: function upvotePost(p) {
+      this.votePost(p, 1);
     },
-    downvote: function downvote(p) {
-      this.vote(p, 0);
+    downvotePost: function downvotePost(p) {
+      this.votePost(p, 0);
     },
-    vote: function vote(p, v) {
+    votePost: function votePost(p, v) {
       //Make sure the user is logged in
       if (!this.checkLoggedIn("You must be logged in to vote")) {
         return;
       }
 
-      axios.post(VOTE_URL, {
-        type: POST_TYPE,
+      axios.post(this.VOTE_URL, {
+        type: this.POST_TYPE,
         vote: v,
         id: p.id
       }, config).then(function (response) {
@@ -565,7 +691,7 @@ __webpack_require__.r(__webpack_exports__);
 
       history.pushState({
         id: 'new_post'
-      }, null, this.base_url + '#new');
+      }, null, this.CURR_BASE_URL + '#new');
       this.showingNewPost = true;
     },
     newPostCreated: function newPostCreated(p) {
@@ -584,8 +710,8 @@ __webpack_require__.r(__webpack_exports__);
       this.showingNewPost = false;
     },
     checkLoggedIn: function checkLoggedIn(t) {
-      //If the user is NOT logged in then we show a modal and set the title as t
-      if (!LOGGED_IN) {
+      //If the user is NOT logged in then we show a modal and set the modal title as t
+      if (!this.$store.state.loggedIn) {
         this.showLogin(t);
         return false;
       } //Otherwise the user is logged in and good to go
@@ -595,7 +721,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     showLogin: function showLogin(t) {
       this.showingNewPost = false;
-      showLoginModal(t);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('showLogin', t); //showLoginModal(t);
     },
     onNavigate: function onNavigate() {
       //Look at the url to determine what to show/hide
@@ -603,7 +729,7 @@ __webpack_require__.r(__webpack_exports__);
         //Show the new post modal if #new is in the url
         this.clearNewPost();
         this.showingNewPost = true;
-      } else if (window.location.href === this.base_url) {
+      } else if (window.location.href === this.CURR_BASE_URL) {
         //if we are at the base url then hide any posts or new post modals
         this.currPost = null;
         this.showingNewPost = false;
@@ -631,7 +757,7 @@ __webpack_require__.r(__webpack_exports__);
     fetchSinglePostByIdAndView: function fetchSinglePostByIdAndView(id) {
       var _this = this;
 
-      axios.post(window.GET_URL, {
+      axios.post(this.GET_URL, {
         id: id
       }, config).then(function (response) {
         if (response.data && response.data.success) {
@@ -660,7 +786,7 @@ __webpack_require__.r(__webpack_exports__);
       if (pushState) {
         history.pushState({
           id: p.id
-        }, null, this.base_url + '/' + p.id);
+        }, null, this.CURR_BASE_URL + '/' + p.id);
       } //Begin loading the comments for the current post
 
 
@@ -777,7 +903,7 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       axios.post(REPORT_URL, {
-        type: type === 'c' ? POST_TYPE + '_comment' : POST_TYPE,
+        type: type === 'c' ? this.POST_TYPE + '_comment' : this.POST_TYPE,
         id: obj.id
       }, config).then(function (response) {//we're just going to close this window whether we succeed or not
       }).catch(function (error) {//we're just going to close this window whether we succeed or not
@@ -810,7 +936,7 @@ __webpack_require__.r(__webpack_exports__);
       //add any members you want reactive in Vue BEFORE you add them to our Vue array
       p.minimized = false;
 
-      if (this.postType === "Riddle") {
+      if (this.POST_TYPE_PRETTY === "Riddle") {
         p.revealed = false;
       } //New line to <br> - nl2br()
 
@@ -906,6 +1032,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./eventbus/EventBus.js */ "./resources/js/components/eventbus/EventBus.js");
 //
 //
 //
@@ -971,27 +1098,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {
-    fromNow: function (_fromNow) {
-      function fromNow(_x) {
-        return _fromNow.apply(this, arguments);
-      }
-
-      fromNow.toString = function () {
-        return _fromNow.toString();
-      };
-
-      return fromNow;
-    }(function (v) {
-      /*
-      if (moment(v).isValid()) {
-      	return moment(v + 'Z', 'YYYY-MM-DD HH:mm:ssZ').fromNow(); //'Z' converts to local time zone
-      }
-      return v;
-      */
-      return fromNow(v);
-    })
+    fromNow: function fromNow(v) {
+      //found in bootstrap.js
+      return window.fromNow(v);
+    }
   },
   props: {
     post: Object,
@@ -1010,105 +1123,52 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   computed: {},
-  mounted: function mounted() {//this.$root.$on('submitComment', (b) => { this.submitComment(b); });
+  mounted: function mounted() {//EventBus.$on('clearNewComment', () => { this.clearNewComment(); });
   },
   methods: {
     upvote: function upvote(p) {
-      this.$root.$emit('upvote', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('upvotePost', p);
     },
     downvote: function downvote(p) {
-      this.$root.$emit('downvote', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('downvotePost', p);
     },
     expandPost: function expandPost(p) {
-      this.$root.$emit('expandPost', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('expandPost', p);
     },
     viewPost: function viewPost(p, b) {
-      this.$root.$emit('viewPost', p, b);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('viewPost', p, b);
     },
     unsavePost: function unsavePost(p) {
-      this.$root.$emit('unsavePost', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('unsavePost', p);
     },
     savePost: function savePost(p) {
-      this.$root.$emit('savePost', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('savePost', p);
     },
     sharePost: function sharePost(p) {
-      this.$root.$emit('sharePost', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('sharePost', p);
     },
     reportPost: function reportPost(p) {
-      this.$root.$emit('reportPost', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('reportPost', p);
     },
     toggleMinimized: function toggleMinimized(p) {
-      this.$root.$emit('toggleMinimized', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('toggleMinimized', p);
     },
     closePost: function closePost() {
-      this.$root.$emit('closePost');
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('closePost');
     },
     submitComment: function submitComment() {
-      //Make sure user is logged in
-      if (!LOGGED_IN) {
-        this.$root.$emit('showLogin', 'You must be logged in to comment');
-        return;
-      } //clear any previous errors
-
-
-      this.newComment.bodyError = this.newComment.ajaxError = ""; //Client-side validation, make sure there is a body
-
-      if (this.newComment.body.length == 0) {
-        this.newComment.bodyError = "Please include content in your comment";
-        return;
-      }
-
-      var _this = this;
-
-      axios.post(SUBMIT_COMMENT_URL, {
-        post_type: POST_TYPE,
-        post_id: this.post.id,
-        comment: this.newComment.body,
-        parent_id: null
-      }, config).then(function (response) {
-        console.log(response);
-
-        if (response.data.success) {
-          //Create an artificial "comment" object formatted as you would get from the server based off the user's newly submitted comment						
-          var c = {
-            children: [],
-            comment: _this.newComment.body,
-            created_at: moment().format('YYYY-MM-DD HH:mm:ssZ'),
-            downvotes: 0,
-            upvotes: 1,
-            id: response.data.new_id,
-            parent_id: null,
-            updated_at: moment().format('YYYY-MM-DD HH:mm:ssZ'),
-            username: USERNAME,
-            voted: 1 //Add our new comment (now correctly formatted) to the top of our list of comments
-
-          };
-
-          _this.comments.unshift(c); //Clear the new comment inputs
-
-
-          _this.clearNewComment();
-        } else {
-          //Unknown Error
-          _this.newComment.ajaxError = "An error has occurred. Please try again.";
-        }
-      }).catch(function (error) {
-        console.log("ERROR");
-        console.log(error);
-        console.log(error.response.headers);
-        console.log(error.response.data); //invalid_parameters
-        //db_error
-
-        _this.newComment.ajaxError = "An error has occurred. Please try again.";
-      });
-    },
-    clearNewComment: function clearNewComment() {
-      this.newComment = {
-        body: "",
-        bodyError: "",
-        ajaxError: ""
-      };
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('postComment', this.post, null, this.newComment, this.comments);
     }
+    /*
+    clearNewComment: function() {
+    	this.newComment = {
+    		body: "",
+    		bodyError: "",
+    		ajaxError: ""
+    	};
+    },
+    */
+
   }
 });
 
@@ -1181,12 +1241,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {
     fromNow: function fromNow(v) {
-      /*
-      if (moment(v).isValid()) {
-      	return moment(v + 'Z', 'YYYY-MM-DD HH:mm:ssZ').fromNow(); //'Z' converts to local time zone
-      }
-      return v;
-      */
+      //found in bootstrap.js
       return window.fromNow(v);
     }
   },
@@ -1211,31 +1266,31 @@ __webpack_require__.r(__webpack_exports__);
   computed: {},
   methods: {
     upvote: function upvote(p) {
-      this.$root.$emit('upvote', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('upvotePost', p);
     },
     downvote: function downvote(p) {
-      this.$root.$emit('downvote', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('downvotePost', p);
     },
     expandPost: function expandPost(p) {
-      this.$root.$emit('expandPost', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('expandPost', p);
     },
     viewPost: function viewPost(p, b) {
-      this.$root.$emit('viewPost', p, b);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('viewPost', p, b);
     },
     unsavePost: function unsavePost(p) {
-      this.$root.$emit('unsavePost', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('unsavePost', p);
     },
     savePost: function savePost(p) {
-      this.$root.$emit('savePost', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('savePost', p);
     },
     sharePost: function sharePost(p) {
-      this.$root.$emit('sharePost', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('sharePost', p);
     },
     reportPost: function reportPost(p) {
-      this.$root.$emit('reportPost', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('reportPost', p);
     },
     toggleMinimized: function toggleMinimized(p) {
-      this.$root.$emit('toggleMinimized', p);
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('toggleMinimized', p);
     }
   }
 });
@@ -1451,7 +1506,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
-    authenticated: Boolean
+    authenticated: Boolean,
+    username: String
   },
   data: function data() {
     return {
@@ -1495,6 +1551,8 @@ __webpack_require__.r(__webpack_exports__);
       });
     }
 
+    this.$store.state.loggedIn = this.authenticated;
+    this.$store.state.username = this.username;
     _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('showLogin', function (title) {
       _this.showLoginModal(title);
     });
@@ -1656,6 +1714,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../eventbus/EventBus.js */ "./resources/js/components/eventbus/EventBus.js");
 //
 //
 //
@@ -1694,27 +1753,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {
-    fromNow: function (_fromNow) {
-      function fromNow(_x) {
-        return _fromNow.apply(this, arguments);
-      }
-
-      fromNow.toString = function () {
-        return _fromNow.toString();
-      };
-
-      return fromNow;
-    }(function (v) {
-      /*
-      if (moment(v).isValid()) {
-      	return moment(v + 'Z', 'YYYY-MM-DD HH:mm:ssZ').fromNow(); //'Z' converts to local time zone
-      }
-      return v;
-      */
-      return fromNow(v);
-    })
+    fromNow: function fromNow(v) {
+      //found in bootstrap.js
+      return window.fromNow(v);
+    }
   },
   props: {
     comment: Object,
@@ -1724,61 +1769,18 @@ __webpack_require__.r(__webpack_exports__);
     return {
       replyToComment: false,
       editComment: false,
-      me: USERNAME,
+      me: this.$store.state.username,
       bgClass: 'cg' + this.comment.depth % 5
     };
   },
   computed: {},
   mounted: function mounted() {},
   methods: {
-    voteOnComment: function voteOnComment(v, c) {
-      if (v != 0 && v != 1) {
-        return;
-      }
-
-      var _this = this; //ajax post
-
-
-      axios.post(VOTE_URL, {
-        type: POST_TYPE + "_comment",
-        id: _this.comment.id,
-        vote: v
-      }, config).then(function (response) {
-        console.log(response);
-
-        if (response.data.success) {
-          if (response.data.success == "vote_saved") {
-            if (v == 1) {
-              _this.comment.upvotes += 1;
-            } else if (v == 0) {
-              _this.comment.downvotes += 1;
-            }
-
-            _this.comment.voted = v;
-          } else if (response.data.success == "vote_unchanged") {} else if (response.data.success == "vote_updated") {
-            if (v == 1) {
-              _this.comment.upvotes += 1;
-              _this.comment.downvotes -= 1;
-            } else if (v == 0) {
-              _this.comment.downvotes += 1;
-              _this.comment.upvotes -= 1;
-            }
-
-            _this.comment.voted = v;
-          }
-        } else {
-          //Unknown Error
-          _this.newComment.ajaxError = "An error has occurred. Please try again.";
-        }
-      }).catch(function (error) {
-        console.log("ERROR");
-        console.log(error);
-        console.log(error.response.headers);
-        console.log(error.response.data); //invalid_parameters
-        //db_error
-
-        _this.newComment.ajaxError = "An error has occurred. Please try again.";
-      });
+    upvoteComment: function upvoteComment(c) {
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('upvoteComment', c);
+    },
+    downvoteComment: function downvoteComment(c) {
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('downvoteComment', c);
     }
   }
 });
@@ -3874,7 +3876,7 @@ var render = function() {
                     [
                       _vm._v(
                         "\n\t\t\t\t\t\tNew " +
-                          _vm._s(_vm.postType) +
+                          _vm._s(_vm.POST_TYPE) +
                           "\n\t\t\t\t\t"
                       )
                     ]
@@ -3882,7 +3884,7 @@ var render = function() {
                 ])
               ]),
               _vm._v(" "),
-              _vm.componentPostType !== "hook"
+              _vm.POST_TYPE !== "hook"
                 ? _c("div", { staticClass: "options" }, [
                     _c(
                       "div",
@@ -3951,7 +3953,7 @@ var render = function() {
                 attrs: {
                   posts: _vm.posts,
                   "show-external-images": _vm.showExternalImages,
-                  "component-post-type": _vm.componentPostType
+                  "component-post-type": _vm.POST_TYPE
                 }
               }),
               _vm._v(" "),
@@ -3979,7 +3981,7 @@ var render = function() {
                   post: _vm.currPost,
                   comments: _vm.currPostComments,
                   "comments-loading": _vm.commentsLoading,
-                  "component-post-type": _vm.componentPostType
+                  "component-post-type": _vm.POST_TYPE
                 }
               })
             : _vm._e()
@@ -4022,7 +4024,7 @@ var render = function() {
                     _c("div", { staticClass: "modal__title" }, [
                       _vm._v(
                         "\n\t\t\t\t\t\tShare this " +
-                          _vm._s(_vm.postType) +
+                          _vm._s(_vm.POST_TYPE) +
                           "\n\t\t\t\t\t"
                       )
                     ]),
@@ -4040,9 +4042,15 @@ var render = function() {
                       _c(
                         "a",
                         {
-                          attrs: { href: _vm.base_url + "/" + _vm.sharePost.id }
+                          attrs: {
+                            href: _vm.CURR_BASE_URL + "/" + _vm.sharePost.id
+                          }
                         },
-                        [_vm._v(_vm._s(_vm.base_url + "/" + _vm.sharePost.id))]
+                        [
+                          _vm._v(
+                            _vm._s(_vm.CURR_BASE_URL + "/" + _vm.sharePost.id)
+                          )
+                        ]
                       )
                     ]),
                     _vm._v(" "),
@@ -4054,7 +4062,7 @@ var render = function() {
                             href:
                               "https://twitter.com/home?status=" +
                               encodeURIComponent(
-                                _vm.base_url + "/" + _vm.sharePost.id
+                                _vm.CURR_BASE_URL + "/" + _vm.sharePost.id
                               ),
                             target: "_blank"
                           }
@@ -4069,7 +4077,7 @@ var render = function() {
                             href:
                               "https://www.facebook.com/sharer/sharer.php?u=" +
                               encodeURIComponent(
-                                _vm.base_url + "/" + _vm.sharePost.id
+                                _vm.CURR_BASE_URL + "/" + _vm.sharePost.id
                               ),
                             target: "_blank"
                           }
@@ -4084,7 +4092,7 @@ var render = function() {
                             href:
                               "https://plus.google.com/share?url=" +
                               encodeURIComponent(
-                                _vm.base_url + "/" + _vm.sharePost.id
+                                _vm.CURR_BASE_URL + "/" + _vm.sharePost.id
                               ),
                             target: "_blank"
                           }
@@ -4133,7 +4141,7 @@ var render = function() {
                     _c("div", { staticClass: "modal__title" }, [
                       _vm._v(
                         "\n\t\t\t\t\t\tReport this " +
-                          _vm._s(_vm.postType) +
+                          _vm._s(_vm.POST_TYPE) +
                           "\n\t\t\t\t\t"
                       )
                     ]),
@@ -5564,7 +5572,7 @@ var render = function() {
               class: { voted: _vm.comment.voted == 1 },
               on: {
                 click: function($event) {
-                  return _vm.voteOnComment(1, _vm.comment)
+                  return _vm.upvoteComment(_vm.comment)
                 }
               }
             },
@@ -5578,7 +5586,7 @@ var render = function() {
               class: { voted: _vm.comment.voted == 0 },
               on: {
                 click: function($event) {
-                  return _vm.voteOnComment(0, _vm.comment)
+                  return _vm.downvoteComment(_vm.comment)
                 }
               }
             },
@@ -5600,7 +5608,7 @@ var render = function() {
                   class: { voted: _vm.comment.voted == 1 },
                   on: {
                     click: function($event) {
-                      return _vm.voteOnComment(1, _vm.comment)
+                      return _vm.upvoteComment(_vm.comment)
                     }
                   }
                 },
@@ -5635,7 +5643,7 @@ var render = function() {
                   class: { voted: _vm.comment.voted == 0 },
                   on: {
                     click: function($event) {
-                      return _vm.voteOnComment(0, _vm.comment)
+                      return _vm.downvoteComment(_vm.comment)
                     }
                   }
                 },
@@ -7911,6 +7919,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_progressbar__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_progressbar__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_1__);
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
 Vue.config.productionTip = false; // Ajax loading bar, MUST BE initialized with axios within each base .js file (eg posts.js and npcs.js)
 
@@ -7988,7 +7998,45 @@ if (token) {
   window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
 } else {
   console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
-}
+} //Deep clone an object
+
+
+window.clone = function (aObject) {
+  if (!aObject) {
+    return aObject;
+  }
+
+  var bObject, v, k;
+  bObject = Array.isArray(aObject) ? [] : {};
+
+  for (k in aObject) {
+    v = aObject[k];
+    bObject[k] = _typeof(v) === "object" ? this.clone(v) : v;
+  }
+
+  return bObject;
+}; // This replaces Moment.js's fromNow() function
+
+
+window.fromNow = function (date) {
+  var thresholds = [46656000000, 27648000000, 3888000000, 2246400000, 129600000, 79200000, 5400000, 2700000, 90000, 46000, 0];
+  var modifiers = [31536000000, 1, 2592000000, 1, 86400000, 1, 3600000, 1, 60000, 1, 1];
+  var outputs = [' years ago', 'a year ago', ' months ago', 'a month ago', ' days ago', 'a day ago', ' hours ago', 'an hour ago', ' minutes ago', 'a minute ago', 'just now'];
+  var d = new Date(date);
+  var elapsed = Math.round(new Date() - d);
+
+  for (var i = 0; i < thresholds.length; i++) {
+    if (elapsed >= thresholds[i]) {
+      if (modifiers[i] > 1) {
+        return Math.round(elapsed / modifiers[i]) + outputs[i];
+      }
+
+      return outputs[i];
+    }
+  }
+
+  return 'just now';
+};
 
 /***/ }),
 
@@ -9903,13 +9951,40 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/store/store.js":
+/*!************************************************!*\
+  !*** ./resources/js/components/store/store.js ***!
+  \************************************************/
+/*! exports provided: store */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "store", function() { return store; });
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
+
+Vue.use(vuex__WEBPACK_IMPORTED_MODULE_0__["default"]);
+var store = new vuex__WEBPACK_IMPORTED_MODULE_0__["default"].Store({
+  state: {
+    loggedIn: false,
+    username: ''
+  },
+  methods: {}
+});
+
+/***/ }),
+
 /***/ "./resources/js/posts.js":
 /*!*******************************!*\
   !*** ./resources/js/posts.js ***!
   \*******************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _components_store_store_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/store/store.js */ "./resources/js/components/store/store.js");
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -9960,8 +10035,12 @@ Vue.component('map-newpost', __webpack_require__(/*! ./components/maps/MapNewpos
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
+//Out Vuex store instance
+
+ //Also add 'store' here to make it globally accessible via this.$store
 
 var app = new Vue({
+  store: _components_store_store_js__WEBPACK_IMPORTED_MODULE_0__["store"],
   el: '#app'
 }); // before a request is made start vue-progressbar
 

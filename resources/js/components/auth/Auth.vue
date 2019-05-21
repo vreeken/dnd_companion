@@ -161,7 +161,8 @@ import { EventBus } from '../eventbus/EventBus.js';
 
 export default {
 	props: {
-		authenticated: Boolean
+		authenticated: Boolean,
+		username: String
 	},
 	data() {
 		return {
@@ -200,7 +201,10 @@ export default {
 				_this.showRegisterModal();
 			});
 		}
-		
+
+		this.$store.state.loggedIn=this.authenticated;
+		this.$store.state.username=this.username;
+
 		EventBus.$on('showLogin', function(title) {
 			_this.showLoginModal(title);
 		});

@@ -63,9 +63,12 @@ Vue.component('map-newpost', require('./components/maps/MapNewpost.vue').default
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+//Out Vuex store instance
+import { store } from './components/store/store.js';
 
-
+//Also add 'store' here to make it globally accessible via this.$store
 const app = new Vue({
+	store,
 	el: '#app'
 });
 

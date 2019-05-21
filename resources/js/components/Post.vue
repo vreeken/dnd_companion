@@ -64,16 +64,14 @@
 </template>
 
 <script>
+
+import { EventBus } from './eventbus/EventBus.js';
+
 export default {
 	filters: {
 		fromNow: function(v) {
-			/*
-			if (moment(v).isValid()) {
-				return moment(v + 'Z', 'YYYY-MM-DD HH:mm:ssZ').fromNow(); //'Z' converts to local time zone
-			}
-			return v;
-			*/
-			return fromNow(v);
+			//found in bootstrap.js
+			return window.fromNow(v);
 		},
 	},
 	props: {
@@ -96,80 +94,22 @@ export default {
 			
 	},
 	mounted: function() {
-		//this.$root.$on('submitComment', (b) => { this.submitComment(b); });
+		//EventBus.$on('clearNewComment', () => { this.clearNewComment(); });
 	},
 	methods:{
-		upvote: function(p) { this.$root.$emit('upvote', p); },
-		downvote: function(p) { this.$root.$emit('downvote', p); },
-		expandPost: function(p) { this.$root.$emit('expandPost', p); },
-		viewPost: function(p, b) { this.$root.$emit('viewPost', p, b); },
-		unsavePost: function(p) { this.$root.$emit('unsavePost', p); },
-		savePost: function(p) { this.$root.$emit('savePost', p); },
-		sharePost: function(p) { this.$root.$emit('sharePost', p); },
-		reportPost: function(p) { this.$root.$emit('reportPost', p); },
-		toggleMinimized: function(p) { this.$root.$emit('toggleMinimized', p); },
-		closePost: function() { this.$root.$emit('closePost'); },
-		
+		upvote: function(p) { EventBus.$emit('upvotePost', p); },
+		downvote: function(p) { EventBus.$emit('downvotePost', p); },
+		expandPost: function(p) { EventBus.$emit('expandPost', p); },
+		viewPost: function(p, b) { EventBus.$emit('viewPost', p, b); },
+		unsavePost: function(p) { EventBus.$emit('unsavePost', p); },
+		savePost: function(p) { EventBus.$emit('savePost', p); },
+		sharePost: function(p) { EventBus.$emit('sharePost', p); },
+		reportPost: function(p) { EventBus.$emit('reportPost', p); },
+		toggleMinimized: function(p) { EventBus.$emit('toggleMinimized', p); },
+		closePost: function() { EventBus.$emit('closePost'); },
 
-		submitComment: function() {
-			//Make sure user is logged in
-			if (!LOGGED_IN) {
-				this.$root.$emit('showLogin', 'You must be logged in to comment');
-				return;
-			}
-
-			//clear any previous errors
-			this.newComment.bodyError = this.newComment.ajaxError = "";
-                
-			//Client-side validation, make sure there is a body
-			if (this.newComment.body.length == 0) {
-				this.newComment.bodyError = "Please include content in your comment";	
-				return;
-			}
-
-			var _this = this;
-			axios.post(SUBMIT_COMMENT_URL, {
-				post_type: POST_TYPE,
-				post_id: this.post.id,
-				comment: this.newComment.body,
-				parent_id: null
-			}, config)
-				.then(function(response) {
-					console.log(response);
-					if (response.data.success) {	
-						//Create an artificial "comment" object formatted as you would get from the server based off the user's newly submitted comment						
-						var c = {
-							children: [],
-							comment: _this.newComment.body,
-							created_at: moment().format('YYYY-MM-DD HH:mm:ssZ'),
-							downvotes: 0,
-							upvotes: 1,
-							id: response.data.new_id,
-							parent_id: null,
-							updated_at: moment().format('YYYY-MM-DD HH:mm:ssZ'),
-							username: USERNAME,
-							voted: 1
-						}
-						//Add our new comment (now correctly formatted) to the top of our list of comments
-						_this.comments.unshift(c);
-						//Clear the new comment inputs
-						_this.clearNewComment();
-					}
-					else {
-						//Unknown Error
-						_this.newComment.ajaxError = "An error has occurred. Please try again.";
-					}
-				})
-				.catch(function(error) {
-					console.log("ERROR");
-					console.log(error);
-					console.log(error.response.headers);
-					console.log(error.response.data);
-					//invalid_parameters
-					//db_error
-					_this.newComment.ajaxError = "An error has occurred. Please try again.";
-				});
-		},
+		submitComment: function() { EventBus.$emit('postComment', this.post, null, this.newComment, this.comments); },
+		/*
 		clearNewComment: function() {
 			this.newComment = {
 				body: "",
@@ -177,6 +117,7 @@ export default {
 				ajaxError: ""
 			};
 		},
+		*/
 	},
 }
 </script>

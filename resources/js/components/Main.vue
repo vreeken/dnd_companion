@@ -78,12 +78,12 @@
 					</div>
 					<div>
 						<div id="new-post-btn" class="button" @click="showNewPost()">
-							New {{ postType }}
+							New {{ POST_TYPE }}
 						</div>
 					</div>
 				</div>
 
-				<div v-if="componentPostType !== 'hook'" class="options">
+				<div v-if="POST_TYPE !== 'hook'" class="options">
 					<div class="toggle-group" @click="toggleShowExternalImages()">
 						<input id="external-images-switch" v-model="showExternalImages" type="checkbox" name="external-images-switch" tabindex="1">
 						<label for="external-images-switch">
@@ -98,14 +98,14 @@
 					</div>
 				</div>
 
-				<posts :posts="posts" :show-external-images="showExternalImages" :component-post-type="componentPostType" />
+				<posts :posts="posts" :show-external-images="showExternalImages" :component-post-type="POST_TYPE" />
 
 				<div v-if="!noMorePosts" class="load-more button" @click="getPosts()">
 					Load More
 				</div>
 			</div>
 
-			<post v-if="currPost" :post="currPost" :comments="currPostComments" :comments-loading="commentsLoading" :component-post-type="componentPostType" />
+			<post v-if="currPost" :post="currPost" :comments="currPostComments" :comments-loading="commentsLoading" :component-post-type="POST_TYPE" />
 		</div>
 
 		<component :is="postTypeNewPost" v-if="showingNewPost" @hideNewPost="hideNewPost()" />
@@ -116,16 +116,16 @@
 				<div class="has-text-centered">
 					<div class="box">
 						<div class="modal__title">
-							Share this {{ postType }}
+							Share this {{ POST_TYPE }}
 						</div>
 						<div class="share-title">
 							{{ sharePost.title }}
 						</div>
-						<div>Direct Link: <a :href="base_url+'/'+sharePost.id">{{ base_url+'/'+sharePost.id }}</a></div>
+						<div>Direct Link: <a :href="CURR_BASE_URL+'/'+sharePost.id">{{ CURR_BASE_URL+'/'+sharePost.id }}</a></div>
 						<div class="socials-large">
-							<a :href="'https://twitter.com/home?status='+encodeURIComponent(base_url+'/'+sharePost.id)" target="_blank"><i class="fab fa-twitter-square" /></a>
-							<a :href="'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(base_url+'/'+sharePost.id)" target="_blank"><i class="fab fa-facebook-square" /></a>
-							<a :href="'https://plus.google.com/share?url='+encodeURIComponent(base_url+'/'+sharePost.id)" target="_blank"><i class="fab fa-google-plus-square" /></a>
+							<a :href="'https://twitter.com/home?status='+encodeURIComponent(CURR_BASE_URL+'/'+sharePost.id)" target="_blank"><i class="fab fa-twitter-square" /></a>
+							<a :href="'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(CURR_BASE_URL+'/'+sharePost.id)" target="_blank"><i class="fab fa-facebook-square" /></a>
+							<a :href="'https://plus.google.com/share?url='+encodeURIComponent(CURR_BASE_URL+'/'+sharePost.id)" target="_blank"><i class="fab fa-google-plus-square" /></a>
 						</div>
 					</div>
 				</div>
@@ -139,7 +139,7 @@
 				<div class="has-text-centered">
 					<div class="box">
 						<div class="modal__title">
-							Report this {{ postType }}
+							Report this {{ POST_TYPE }}
 						</div>
 						<div class="share-title">
 							{{ reportPost.title }}
@@ -172,6 +172,9 @@
 </template>
 
 <script>
+
+import { EventBus } from './eventbus/EventBus.js';
+
 export default {
 	filters: {
 
@@ -182,9 +185,15 @@ export default {
 	data() {
 		return {
 			//registerTitle: REGISTER_TITLE,
-			postType: POST_TYPE_PRETTY,
-			componentPostType: COMPONENT_POST_TYPE,
-			postTypeNewPost: COMPONENT_POST_TYPE + '-newpost',
+			VOTE_URL: this.data.api_url + '/vote',
+			POST_TYPE_PRETTY: this.data.post_type_pretty,
+			POST_TYPE: this.data.post_type,
+			GET_URL: this.data.api_url + '/' + this.data.post_type + 's',
+			SORT_BY_METHODS: ["r", "uv", "dv", "dd", "da"],
+			CURR_BASE_URL: this.data.base_url+'/'+this.data.post_type+'s',
+			SUBMIT_COMMENT_URL: this.data.api_url + '/comments/new',
+
+			postTypeNewPost: this.data.post_type + '-newpost',
 			sortByMethod: 0,
 			filterByMethod: 0,
 			sortByRandomSeed: Math.floor(Math.random() * 1000000),
@@ -211,9 +220,9 @@ export default {
 			reportPost: null,
 			reportComment: null,
 			reportResult: null,
-			base_url: BASE_URL,
 
-			showExternalImages: this.data.show_external_images=='true',
+
+			showExternalImages: this.data.show_external_images === 'true',
 			ajaxingShowExternalImages: false,
 
 			noMorePosts: false,
@@ -221,19 +230,25 @@ export default {
 	},
 	mounted: function() {
 		//Event Listeners
-		this.$root.$on('upvote', (p) => { this.upvote(p); });
-		this.$root.$on('downvote', (p) => { this.downvote(p); });
-		this.$root.$on('expandPost', (p) => { this.expandPost(p); });
-		this.$root.$on('viewPost', (p, b) => { this.viewPost(p, b); });
-		this.$root.$on('unsavePost', (p) => { this.unsavePost(p); });
-		this.$root.$on('savePost', (p) => { this.savePost(p); });
-		this.$root.$on('sharePost', (p) => { this.sharePost = p; });
-		this.$root.$on('reportPost', (p) => { this.reportPost = p; });
-		this.$root.$on('toggleMinimized', (p) => { this.toggleMinimized(p); });
-		this.$root.$on('closePost', () => { this.closePost(); });
-		this.$root.$on('newPostCreated', (p) => { this.newPostCreated(p); });
-		this.$root.$on('showLogin', (t) => { this.showLogin(t); });
+		EventBus.$on('upvotePost', (p) => { this.upvotePost(p); });
+		EventBus.$on('downvotePost', (p) => { this.downvotePost(p); });
+		EventBus.$on('expandPost', (p) => { this.expandPost(p); });
+		EventBus.$on('viewPost', (p, b) => { this.viewPost(p, b); });
+		EventBus.$on('unsavePost', (p) => { this.unsavePost(p); });
+		EventBus.$on('savePost', (p) => { this.savePost(p); });
+		EventBus.$on('sharePost', (p) => { this.sharePost = p; });
+		EventBus.$on('reportPost', (p) => { this.reportPost = p; });
+		EventBus.$on('toggleMinimized', (p) => { this.toggleMinimized(p); });
+		EventBus.$on('closePost', () => { this.closePost(); });
+		EventBus.$on('newPostCreated', (p) => { this.newPostCreated(p); });
+		EventBus.$on('showLogin', (t) => { this.showLogin(t); });
 		//this.$on('hideNewPost', () => { this.hideNewPost(); });
+
+		EventBus.$on('upvoteComment', (c) => { this.upvoteComment(c) });
+		EventBus.$on('downvoteComment', (c) => { this.downvoteComment(c) });
+
+		EventBus.$on('postComment', (post_id, parent_id, comment, comments) => { this.postComment(post_id, parent_id, comment, comments) });
+
 
 		//Init New post
 		this.clearNewPost();
@@ -246,19 +261,19 @@ export default {
 
 
 		//Check if we get a post's data from the server from the url
-		if (URL_POST && URL_COMMENTS) {
+		if (this.data.post && this.data.comments) {
 			//We got a post so make it the current post and show it
 
-			this.currPost = this.preFormatPost(URL_POST);
+			this.currPost = this.preFormatPost(this.data.post);
 			this.showingPost=true;
 
 			//Push new url to history, so the user can click back from here and get to a list of other posts
-			history.replaceState({id: this.base_url}, null, this.base_url);
-			//history.pushState({id: this.base_url}, null, this.base_url);
-			history.pushState({id: this.base_url+'/'+this.currPost.id}, null, this.base_url+'/'+this.currPost.id);
+			history.replaceState({id: this.CURR_BASE_URL}, null, this.CURR_BASE_URL);
+			//history.pushState({id: this.CURR_BASE_URL}, null, this.CURR_BASE_URL);
+			history.pushState({id: this.CURR_BASE_URL+'/'+this.currPost.id}, null, this.CURR_BASE_URL+'/'+this.currPost.id);
 
 			//Sort the comments given to us by the server
-			this.processComments(URL_COMMENTS);
+			this.processComments(this.data.comments);
 
 		}
 
@@ -266,12 +281,126 @@ export default {
 		this.getPosts();
 
 		if (window.location.hash === '#new') {
-			history.replaceState({id: '/'}, null, this.base_url);
-			history.pushState({id: 'new_post'}, null, this.base_url+'#new');
+			history.replaceState({id: '/'}, null, this.CURR_BASE_URL);
+			history.pushState({id: 'new_post'}, null, this.CURR_BASE_URL+'#new');
 			this.showingNewPost=true;
 		}
 	},
 	methods: {
+		upvoteComment: function(c) {
+			this.voteOnComment(1, c);
+		},
+		downvoteComment: function(c) {
+			this.voteOnComment(0, c);
+		},
+		voteOnComment(v, c) {
+			if (!this.checkLoggedIn("You must be logged in to vote")) { return; }
+
+			if (v !== 0 && v !== 1) { return; }
+
+			const _this = this;
+			//ajax post
+			axios.post(this.VOTE_URL, {
+				type: this.POST_TYPE+"_comment",
+				id: c.id,
+				vote: v
+			}, config)
+				.then(function(response) {
+					if (response.data.success) {
+						if (response.data.success === "vote_saved") {
+							if (v === 1) { c.upvotes+=1; }
+							else if (v === 0) { c.downvotes+=1; }
+							c.voted=v;
+						}
+						else if (response.data.success === "vote_unchanged") {
+
+						}
+						else if (response.data.success === "vote_updated") {
+							if (v === 1) {
+								c.upvotes+=1;
+								c.downvotes-=1;
+							}
+							else if (v === 0) {
+								c.downvotes+=1;
+								c.upvotes-=1;
+							}
+							c.voted=v;
+						}
+					}
+					else {
+						//Unknown Error
+						//_this.newComment.ajaxError = "An error has occurred. Please try again.";
+					}
+				})
+				.catch(function(error) {
+					console.log("ERROR");
+					console.log(error);
+					console.log(error.response.headers);
+					console.log(error.response.data);
+					//invalid_parameters
+					//db_error
+					//_this.newComment.ajaxError = "An error has occurred. Please try again.";
+				});
+		},
+		postComment: function(post, parent_id, comment, comments) {
+			//Make sure user is logged in
+			if (!this.$store.state.loggedIn) {
+				EventBus.$emit('showLogin', 'You must be logged in to comment');
+				return;
+			}
+
+			//clear any previous errors
+			this.newComment.bodyError = this.newComment.ajaxError = "";
+
+			//Client-side validation, make sure there is a body
+			if (comment.body.length === 0) {
+				comment.bodyError = "Please include content in your comment";
+				return;
+			}
+
+			var _this = this;
+			axios.post(this.SUBMIT_COMMENT_URL, {
+				post_type: this.POST_TYPE,
+				post_id: post.id,
+				comment: comment.body,
+				parent_id: parent_id
+			}, config)
+				.then(function(response) {
+					if (response.data.success) {
+						//Create an artificial "comment" object formatted as you would get from the server based off the user's newly submitted comment
+						const now = new Date().toISOString();
+						var c = {
+							children: [],
+							comment: comment.body,
+							created_at: now,
+							downvotes: 0,
+							upvotes: 1,
+							id: response.data.new_id,
+							parent_id: null,
+							updated_at: now,
+							username: _this.$store.state.username,
+							voted: 1
+						}
+						//Add our new comment (now correctly formatted) to the top of our list of comments
+						comments.unshift(c);
+
+						comment.bodyError = comment.ajaxError = comment.body = "";
+					}
+					else {
+						//Unknown Error
+						post.newComment.ajaxError = "An error has occurred. Please try again.";
+					}
+				})
+				.catch(function(error) {
+					console.log("ERROR");
+					console.log(error);
+					console.log(error.response.headers);
+					console.log(error.response.data);
+					//invalid_parameters
+					//db_error
+					_this.newComment.ajaxError = "An error has occurred. Please try again.";
+				});
+		},
 		/*
 			hover: () => {
 				this.timer = setTimeout(() => this.showPopover(), 600)
@@ -314,10 +443,10 @@ export default {
 		fetchPosts: function(immediate) {
 			//immediate: true = immediately add new posts to our current posts, false = add to our prefetchedPosts array
 			const _this = this;
-			axios.post(window.GET_URL, {
+			axios.post(this.GET_URL, {
 				page: this.pageNum,
 				filter: this.filterByMethod,
-				method: SORT_BY_METHODS[this.sortByMethod],
+				method: this.SORT_BY_METHODS[this.sortByMethod],
 				seed: this.sortByRandomSeed
 			}, config)
 				.then(function(response) {
@@ -338,16 +467,16 @@ export default {
 						//If this is the first time we're getting posts, then do some initializing
 						if (_this.posts == null) {
 							_this.posts = [];
-							if (URL_POST) {
+							if (_this.data.post) {
 								//Do we have a post's data provided by the server? If so, add it as the first post before adding newly fetched posts
 
-								_this.posts.push(_this.preFormatPost(URL_POST));
+								_this.posts.push(_this.preFormatPost(_this.data.post));
 							}
 						}
 						//Loop through posts retrieved from the server, append some client side vars then add to our current posts array
 						while(response.data.posts.length) {
 							//If we happen to come across our url provided post then don't add it to the list, because we already have it
-							if (URL_POST && response.data.posts[0].id === URL_POST.id) {
+							if (_this.data.post && response.data.posts[0].id === _this.data.post.id) {
 								let found=false;
 								for (let i=0; i<_this.posts.length; i++) {
 									if (_this.posts[i].id === response.data.posts[0].id) {
@@ -424,18 +553,18 @@ export default {
 		expandPost: function(p) {
 			if (p.minimized) p.minimized=false;
 		},
-		upvote: function(p) {
-			this.vote(p, 1);
+		upvotePost: function(p) {
+			this.votePost(p, 1);
 		},
-		downvote: function(p) {
-			this.vote(p, 0);
+		downvotePost: function(p) {
+			this.votePost(p, 0);
 		},
-		vote: function(p, v) {
+		votePost: function(p, v) {
 			//Make sure the user is logged in
 			if (!this.checkLoggedIn("You must be logged in to vote")) { return; }
 
-			axios.post(VOTE_URL, {
-				type: POST_TYPE,
+			axios.post(this.VOTE_URL, {
+				type: this.POST_TYPE,
 				vote: v,
 				id: p.id
 			}, config)
@@ -544,7 +673,7 @@ export default {
 		showNewPost: function() {
 			if (!this.checkLoggedIn("Please login to submit a post")) { return; }
 
-			history.pushState({id: 'new_post'}, null, this.base_url+'#new');
+			history.pushState({id: 'new_post'}, null, this.CURR_BASE_URL+'#new');
 
 			this.showingNewPost=true;
 		},
@@ -564,8 +693,8 @@ export default {
 			this.showingNewPost=false;
 		},
 		checkLoggedIn: function(t) {
-			//If the user is NOT logged in then we show a modal and set the title as t
-			if (!LOGGED_IN) {
+			//If the user is NOT logged in then we show a modal and set the modal title as t
+			if (!this.$store.state.loggedIn) {
 				this.showLogin(t);
 				return false;
 			}
@@ -574,7 +703,8 @@ export default {
 		},
 		showLogin: function(t) {
 			this.showingNewPost=false;
-			showLoginModal(t);
+			EventBus.$emit('showLogin', t);
+			//showLoginModal(t);
 		},
 		onNavigate: function() {
 			//Look at the url to determine what to show/hide
@@ -584,7 +714,7 @@ export default {
 				this.clearNewPost();
 				this.showingNewPost=true;
 			}
-			else if (window.location.href === this.base_url) {
+			else if (window.location.href === this.CURR_BASE_URL) {
 				//if we are at the base url then hide any posts or new post modals
 				this.currPost=null;
 				this.showingNewPost=false;
@@ -612,7 +742,7 @@ export default {
 		},
 		fetchSinglePostByIdAndView: function(id) {
 			const _this = this;
-			axios.post(window.GET_URL, {
+			axios.post(this.GET_URL, {
 				id: id
 			}, config)
 				.then(function(response) {
@@ -642,7 +772,7 @@ export default {
 
 			//Push new url to history if needed. We only have to push to history if the user is clicking a post, not if they use browser navigation buttons
 			if (pushState) {
-				history.pushState({id: p.id}, null, this.base_url+'/'+p.id);
+				history.pushState({id: p.id}, null, this.CURR_BASE_URL+'/'+p.id);
 			}
 			//Begin loading the comments for the current post
 			this.loadComments();
@@ -764,7 +894,7 @@ export default {
 		reportThis: function(type, obj) {
 			const _this = this;
 			axios.post(REPORT_URL, {
-				type: type==='c' ? POST_TYPE + '_comment' : POST_TYPE,
+				type: type==='c' ? this.POST_TYPE + '_comment' : this.POST_TYPE,
 				id: obj.id
 			}, config)
 				.then(function(response) {
@@ -807,7 +937,7 @@ export default {
 			//add any members you want reactive in Vue BEFORE you add them to our Vue array
 			p.minimized=false;
 
-			if (this.postType === "Riddle") {
+			if (this.POST_TYPE_PRETTY === "Riddle") {
 				p.revealed=false;
 			}
 

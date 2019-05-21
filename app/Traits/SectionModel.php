@@ -203,6 +203,9 @@ trait SectionModel {
 
 		$data['post_type']=POST_TYPE;
 		$data['post_type_pretty']=POST_TYPE_PRETTY;
+		$data['api_url']=url('api/');
+		$data['base_url']=url('/');
+		$data['username']=$user ? $user->username : '';
 
 		// BEWARE $options->showExternalImages will return a boolean which doesn't pass to views as a string
 		$data['show_external_images']=$options && isset($options->showExternalImages) && $options->showExternalImages ? 'true' : 'false';		

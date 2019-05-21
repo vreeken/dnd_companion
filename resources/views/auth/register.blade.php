@@ -133,7 +133,6 @@
 				remember: re
 			})
 			.then(function (response) {
-				//console.log(response.data);
 				if (response.data && response.data.jwt) {
 					localStorage.setItem('user', JSON.stringify(response.data));
 					window.location.href = "{{ url('/') }}";
@@ -147,12 +146,25 @@
 			})
 			.catch(function (error) {
 				var e = document.getElementById("register-error");
-				if (error.response.status == 401) {
-					e.innerHTML = "Invalid Email/Password";
+
+				var err = false;
+				if (error.response && error.response.data && error.response.data.error) {
+					var d = error.response.data.error;
+					if (d == "invalid_password") {
+						err = "Your password must be at least 6 characters long.";
+					}
+					else if (d === "username_in_use") {
+						err = "That username is already in use. Please select another";
+					}
+					else if (d === "email_in_use") {
+						err = "That email address is already in use. Please select another or login using that email.";
+					}
+					else {
+						err = "An error occurred. Please try again.";
+					}
 				}
-				else {
-					e.innerHTML = "An error occurred. Please try again.";
-				}
+				
+				e.innerHTML = err || "An error occurred. Please try again.";
 				e.setAttribute("style", "display:block");
 				document.getElementById('register-btn').classList.remove('busy');
 			});

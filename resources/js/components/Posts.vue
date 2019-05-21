@@ -52,17 +52,12 @@
 </template>
 
 <script>
-	import { EventBus } from './eventbus/EventBus.js';
+import { EventBus } from './eventbus/EventBus.js';
 
 export default {
 	filters: {
 		fromNow: function(v) {
-			/*
-			if (moment(v).isValid()) {
-				return moment(v + 'Z', 'YYYY-MM-DD HH:mm:ssZ').fromNow(); //'Z' converts to local time zone
-			}
-			return v;
-			*/
+			//found in bootstrap.js
 			return window.fromNow(v);
 		},
 	},
@@ -88,15 +83,15 @@ export default {
 				
 	},
 	methods:{
-		upvote: function(p) { this.$root.$emit('upvote', p); },
-		downvote: function(p) { this.$root.$emit('downvote', p); },
-		expandPost: function(p) { this.$root.$emit('expandPost', p); },
-		viewPost: function(p, b) { this.$root.$emit('viewPost', p, b); },
-		unsavePost: function(p) { this.$root.$emit('unsavePost', p); },
-		savePost: function(p) { this.$root.$emit('savePost', p); },
-		sharePost: function(p) { this.$root.$emit('sharePost', p); },
-		reportPost: function(p) { this.$root.$emit('reportPost', p); },
-		toggleMinimized: function(p) { this.$root.$emit('toggleMinimized', p); },
+		upvote: function(p) { EventBus.$emit('upvotePost', p); },
+		downvote: function(p) { EventBus.$emit('downvotePost', p); },
+		expandPost: function(p) { EventBus.$emit('expandPost', p); },
+		viewPost: function(p, b) { EventBus.$emit('viewPost', p, b); },
+		unsavePost: function(p) { EventBus.$emit('unsavePost', p); },
+		savePost: function(p) { EventBus.$emit('savePost', p); },
+		sharePost: function(p) { EventBus.$emit('sharePost', p); },
+		reportPost: function(p) { EventBus.$emit('reportPost', p); },
+		toggleMinimized: function(p) { EventBus.$emit('toggleMinimized', p); },
 	},
 }
 </script>

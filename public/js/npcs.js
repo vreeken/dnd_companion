@@ -170,7 +170,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
-    authenticated: Boolean
+    authenticated: Boolean,
+    username: String
   },
   data: function data() {
     return {
@@ -214,6 +215,8 @@ __webpack_require__.r(__webpack_exports__);
       });
     }
 
+    this.$store.state.loggedIn = this.authenticated;
+    this.$store.state.username = this.username;
     _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('showLogin', function (title) {
       _this.showLoginModal(title);
     });
@@ -6664,6 +6667,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_progressbar__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_progressbar__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_1__);
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
 Vue.config.productionTip = false; // Ajax loading bar, MUST BE initialized with axios within each base .js file (eg posts.js and npcs.js)
 
@@ -6741,7 +6746,45 @@ if (token) {
   window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
 } else {
   console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
-}
+} //Deep clone an object
+
+
+window.clone = function (aObject) {
+  if (!aObject) {
+    return aObject;
+  }
+
+  var bObject, v, k;
+  bObject = Array.isArray(aObject) ? [] : {};
+
+  for (k in aObject) {
+    v = aObject[k];
+    bObject[k] = _typeof(v) === "object" ? this.clone(v) : v;
+  }
+
+  return bObject;
+}; // This replaces Moment.js's fromNow() function
+
+
+window.fromNow = function (date) {
+  var thresholds = [46656000000, 27648000000, 3888000000, 2246400000, 129600000, 79200000, 5400000, 2700000, 90000, 46000, 0];
+  var modifiers = [31536000000, 1, 2592000000, 1, 86400000, 1, 3600000, 1, 60000, 1, 1];
+  var outputs = [' years ago', 'a year ago', ' months ago', 'a month ago', ' days ago', 'a day ago', ' hours ago', 'an hour ago', ' minutes ago', 'a minute ago', 'just now'];
+  var d = new Date(date);
+  var elapsed = Math.round(new Date() - d);
+
+  for (var i = 0; i < thresholds.length; i++) {
+    if (elapsed >= thresholds[i]) {
+      if (modifiers[i] > 1) {
+        return Math.round(elapsed / modifiers[i]) + outputs[i];
+      }
+
+      return outputs[i];
+    }
+  }
+
+  return 'just now';
+};
 
 /***/ }),
 
