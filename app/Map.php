@@ -2,29 +2,46 @@
 
 namespace App;
 
-use http\Env\Request;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Http\Request;
 use Image;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\JWTAuth;
 
-use App\Traits\SectionModel;
 
-//Make sure we define things here if they haven't already been defined elsewhere
-defined('POST_TYPE') || define('POST_TYPE', 'map');
-defined('POST_URL') || define('POST_URL', 'maps');
-defined('POST_TABLE') || define('POST_TABLE', 'maps');
-defined('POST_TYPE_PRETTY') || define('POST_TYPE_PRETTY', 'Map');
+class Map extends ParentPostModel {
 
-class Map extends Model {
+	public $POSTS_URL;
+	public $POST_TABLE;
+	public $POST_TYPE;
+	public $POST_TYPE_PRETTY;
+	public $VOTES_TABLE;
+	public $COMMENTS_TABLE;
+	public $COMMENT_VOTES_TABLE;
+	public $BOOKMARKS_TABLE;
+	public $POST_SELECT_QUERY;
 
     use SoftDeletes;
-    use SectionModel;
 
-    public static $POST_SELECT_QUERY = POST_TABLE. '.id, ' .POST_TABLE. '.title, ' .POST_TABLE. '.user_id, ' .POST_TABLE. '.description, ' .POST_TABLE. '.link, ' .POST_TABLE. '.created_at, ' .POST_TABLE. '.updated_at, users.username';
+	function __construct() {
+		parent::__construct();
+
+		$this->POST_TYPE = 'map';
+		$this->POST_TYPE_PRETTY = 'Map';
+
+		$this->POSTS_URL = $this->POST_TYPE.'s';
+		$this->POST_TABLE = $this->POST_TYPE.'s';
+		$this->VOTES_TABLE = $this->POST_TYPE.'_votes';
+		$this->COMMENTS_TABLE = $this->POST_TYPE.'_comments';
+		$this->COMMENT_VOTES_TABLE = $this->POST_TYPE.'_comment_votes';
+		$this->BOOKMARKS_TABLE = $this->POST_TYPE.'_bookmarks';
+
+		$this->POST_SELECT_QUERY = $this->POST_TABLE. '.id, ' .$this->POST_TABLE. '.title, ' .$this->POST_TABLE. '.user_id, ' .$this->POST_TABLE. '.description, ' .$this->POST_TABLE. '.link, ' .$this->POST_TABLE. '.created_at, ' .$this->POST_TABLE. '.updated_at, users.username';
+	}
 
     public static $ENVIRONMENTS = ['Abyss/Nine Hells','Air/Sky Ship','Cave','City/Urban','Desert','Dungeon','Extraplanar','Feywild','Forest','House/Mansion','Island','Jungle','Megadungeon','Mountain','Other','Ruins','Sewer','Shadowfell','Ship','Stronghold/Castle/Tower','Swamp','Temple','Town/Village','Underdark','Underwater','Wilderness'];
 
-    public static function submitMap(Request $request) {
+    public function submitMap(Request $request) {
         //Make sure Request has the correct parameters
         if (!$request->has('desc') || !$request->has('title') || !$request->has('link') || !$request->has('img') || !$request->has('envs')) {
             return response()->json(['error'=>'invalid_parameters'], 400);
@@ -39,7 +56,7 @@ class Map extends Model {
 
         foreach ($envs as $env) {
             $env = (int)$env;
-            if ($env < 0 || $env >= count(self::$ENVIRONMENTS)) {
+            if ($env < 0 || $env >= count($this->ENVIRONMENTS)) {
                 return response()->json(['error'=>'invalid_environment_parameter'], 400);
             }
         }
@@ -82,7 +99,7 @@ class Map extends Model {
         return response()->json(['error'=>'db_error'], 500);
     }
 
-    public static function getMapDetails($id, Request $request) {
+    public function getMapDetails($id, Request $request): \Illuminate\Http\JsonResponse {
         $map_id = (int)$id;
         $map = DB::table('maps')
             ->join('users', 'maps.user_id', '=', 'users.id')
@@ -136,13 +153,13 @@ class Map extends Model {
             ->take(20)->get();
 
         $output['map']=$map;
-        $output['environments']=self::$ENVIRONMENTS;
+        $output['environments']=$this->ENVIRONMENTS;
         $output['comments']=$comments;
 
         return response()->json($output);
     }
 
-    public static function getMaps(Request $request) {
+    public function getMaps(Request $request) {
         $qty=10;
 
         if (!$request->has('page') || !$request->has('envs')) {
@@ -299,29 +316,29 @@ class Map extends Model {
         return response()->json($maps);
     }
 
-    public static function getMapById($id, $user=null) {
+    public function getMapById($id, $user=null) {
         $id = (int)$id;
         if ($id>0) {
             if ($user) {
                 $RAW_VOTED_POST_QUERY = '(CASE '.
-                    'WHEN (SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=0 AND '.self::$VOTES_TABLE.'.user_id='. (int)$user->id .')>0 THEN 0 '.
-                    'WHEN (SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=1 AND '.self::$VOTES_TABLE.'.user_id='. (int)$user->id .')>0 THEN 1 '.
+                    'WHEN (SELECT count(*) FROM '.$this->VOTES_TABLE.' WHERE '.$this->VOTES_TABLE.'.'.$this->POST_TYPE.'_id='.$this->POST_TABLE.'.id AND '.$this->VOTES_TABLE.'.vote=0 AND '.$this->VOTES_TABLE.'.user_id='. (int)$user->id .')>0 THEN 0 '.
+                    'WHEN (SELECT count(*) FROM '.$this->VOTES_TABLE.' WHERE '.$this->VOTES_TABLE.'.'.$this->POST_TYPE.'_id='.$this->POST_TABLE.'.id AND '.$this->VOTES_TABLE.'.vote=1 AND '.$this->VOTES_TABLE.'.user_id='. (int)$user->id .')>0 THEN 1 '.
                     'ELSE -1 END) AS voted'.
-                    ', (SELECT count(*) FROM '.self::$BOOKMARKS_TABLE.' WHERE '.self::$BOOKMARKS_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$BOOKMARKS_TABLE.'.user_id='. (int)$user->id .') AS saved';
+                    ', (SELECT count(*) FROM '.$this->BOOKMARKS_TABLE.' WHERE '.$this->BOOKMARKS_TABLE.'.'.$this->POST_TYPE.'_id='.$this->POST_TABLE.'.id AND '.$this->BOOKMARKS_TABLE.'.user_id='. (int)$user->id .') AS saved';
             }
             else {
                 $RAW_VOTED_POST_QUERY = '-1 AS voted, 0 AS saved';
             }
 
-            $post = DB::table(self::$POST_TABLE)
-                ->join('users', self::$POST_TABLE.'.user_id', '=', 'users.id')
+            $post = DB::table($this->POST_TABLE)
+                ->join('users', $this->POST_TABLE.'.user_id', '=', 'users.id')
                 ->select(
-                    DB::raw(self::$POST_SELECT_QUERY),
-                    DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=1) as upvotes'),
-                    DB::raw('(SELECT count(*) FROM '.self::$VOTES_TABLE.' WHERE '.self::$VOTES_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id AND '.self::$VOTES_TABLE.'.vote=0) as downvotes'),
-                    DB::raw('(SELECT count(*) FROM '.self::$COMMENTS_TABLE.' WHERE '.self::$COMMENTS_TABLE.'.'.self::$POST_TYPE.'_id='.self::$POST_TABLE.'.id) as commentcount'),
+                    DB::raw($this->POST_SELECT_QUERY),
+                    DB::raw('(SELECT count(*) FROM '.$this->VOTES_TABLE.' WHERE '.$this->VOTES_TABLE.'.'.$this->POST_TYPE.'_id='.$this->POST_TABLE.'.id AND '.$this->VOTES_TABLE.'.vote=1) as upvotes'),
+                    DB::raw('(SELECT count(*) FROM '.$this->VOTES_TABLE.' WHERE '.$this->VOTES_TABLE.'.'.$this->POST_TYPE.'_id='.$this->POST_TABLE.'.id AND '.$this->VOTES_TABLE.'.vote=0) as downvotes'),
+                    DB::raw('(SELECT count(*) FROM '.$this->COMMENTS_TABLE.' WHERE '.$this->COMMENTS_TABLE.'.'.$this->POST_TYPE.'_id='.$this->POST_TABLE.'.id) as commentcount'),
                     DB::raw($RAW_VOTED_POST_QUERY))
-                ->where(self::$POST_TABLE.'.id', $id)
+                ->where($this->POST_TABLE.'.id', $id)
                 ->first();
 
             if ($post) {
