@@ -3,24 +3,25 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Traits\PostBaseMethods;
 use App\Map;
 
-class MapController extends Controller {
-    public $model = Map::class;
+class MapController extends ParentPostController {
+    public $model;
 
-    use PostBaseMethods;
+	function __construct() {
+		$this->model = new Map();
+	}
 
     public function submitPost(Request $request) {
-        return $this->model::submitMap($request);
+        return $this->model->submitMap($request);
     }
 
 	public function getMaps(Request $request) {
-		return $this->model::getMaps($request);
+		return $this->model->getMaps($request);
 	}
 
-	public function getPostDetails($id, Request $request) {
-		return $this->model::getMapDetails($id, $request);
+	public function getPostDetails($id, Request $request): \Illuminate\Http\JsonResponse {
+		return $this->model->getMapDetails($id, $request);
 	}
 
 	/*
