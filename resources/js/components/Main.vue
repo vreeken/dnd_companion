@@ -852,7 +852,7 @@ export default {
 
 			const _this = this;
 			axios.post(this.GET_COMMENTS_URL, {
-				post_type: POST_TYPE,
+				post_type: this.POST_TYPE,
 				post_id: this.currPost.id
 			}, config)
 				.then(function(response) {
