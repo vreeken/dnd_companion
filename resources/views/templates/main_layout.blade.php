@@ -52,7 +52,7 @@
 		<div id="app" >
 				
 				@if (Auth::check())
-					<auth :authenticated="true" :username="'{{$data['username']}}'"></auth>
+					<auth :authenticated="true" :username="'{{ Auth::user() ? Auth::user()->username : '' }}'"></auth>
 				@else
 					<auth :authenticated="false" :username=""></auth>
 				@endif
