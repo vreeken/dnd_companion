@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Image;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\JWTAuth;
+use DB;
 
 
 class Map extends ParentPostModel {
@@ -43,41 +44,84 @@ class Map extends ParentPostModel {
 
     public function submitMap(Request $request) {
         //Make sure Request has the correct parameters
-        if (!$request->has('desc') || !$request->has('title') || !$request->has('link') || !$request->has('img') || !$request->has('envs')) {
-            return response()->json(['error'=>'invalid_parameters'], 400);
+        if (!$request->has('desc') && !$request->has('body')) {
+            return response()->json(['error'=>'invalid_parameters', 'msg'=>'Missing body param'], 400);
+        }
+
+        if (!$request->has('title')) {
+            return response()->json(['error'=>'invalid_parameters', 'msg'=>'Missing title param'], 400);
+        }
+
+        if (!$request->has('link') && !$request->has('external_link')) {
+            return response()->json(['error'=>'invalid_parameters', 'msg'=>'Missing link param'], 400);
         }
 
         $user = self::getUser();
 
-        $envs = explode(',', $request->input('envs'));
+        $envs = [];
+
+        if ($request->has('envs')) {
+            $envs = explode(',', $request->input('envs'));
+        }
+
+        /*
         if (count($envs) < 1) {
             return response()->json(['error'=>'invalid_environments_parameter'], 400);
         }
-
+        */
         foreach ($envs as $env) {
             $env = (int)$env;
             if ($env < 0 || $env >= count($this->ENVIRONMENTS)) {
-                return response()->json(['error'=>'invalid_environment_parameter'], 400);
+                return response()->json(['error'=>'invalid_parameters', 'msg'=>'Invalid envs param'], 400);
             }
         }
+        
 
         $map = new Map;
         $map->user_id=$user->id;
-        $map->link=$request->input('link');
+
         $map->title=$request->input('title');
-        $map->description=$request->input('desc');
+
+        $map->description=$request->has('desc') ? $request->input('desc') : $request->input('body');
+
+
+        $link = null;
+        if ($request->has('link')) {
+            $link = $request->input('link');
+        }
+        else if ($request->has('external_link')) {
+            $link = $request->input('external_link');
+        }
+        $map->link = $link !== null ? $link : "";
+
+        $suf = substr($map->link, -4);
+        if ($suf === '.jpg' || $suf === '.png') {
+            $img_url = $map->link; 
+        }
+        else {
+            if (!$request->has('img') && !$request->has('image_link')) {
+                return response()->json(['error'=>'invalid_parameters', 'msg'=>'Missing image param'], 400);
+            }
+            $img_url = $request->has('img') ? $request->input('img') : $request->input('image_link');
+            $suf = substr($img_url, -4);
+            if ($suf !== '.jpg' && $suf !== '.png') {
+                return response()->json(['error'=>'invalid_parameters', 'msg'=>'Invalid image param, must be jpg or png'], 400);
+            }
+
+        }
+        
 
         if ($map->save()) {
             try {
                 //TODO do this before creating Map?
                 //create img
                 //TODO make sure maps folder exists before using
-                $image = Image::make($request->input('img'));
+                $image = Image::make($img_url);
                 $image->fit(100, 100)->save(public_path('map_thumbs/'. $map->id .'.jpg'));
             }
-            catch(Exception $e) {
+            catch(\Exception $e) {
                 $map->delete();
-                return response()->json(['error'=>'img_error'], 400);
+                return response()->json(['error'=>'img_error', 'msg'=>'Invalid image url'], 400);
             }
 
             $env_ins = [];

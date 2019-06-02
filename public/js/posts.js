@@ -2644,7 +2644,7 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     submitPost: function submitPost() {
       //Init newPost error values to blank
-      this.newPost.titleError = this.newPost.bodyError = this.newPost.ajaxError = ""; //Client side validation, make sure there's a title and body
+      this.newPost.titleError = this.newPost.bodyError = this.newPost.ajaxError = this.newPost.imageLinkError = this.newPost.externalLinkError = ""; //Client side validation, make sure there's a title and body
 
       if (this.newPost.title.length == 0) {
         this.newPost.titleError = "Please include a title";
@@ -2829,6 +2829,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {},
@@ -2836,25 +2840,78 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {};
   },
-  computed: {},
+  computed: {
+    thumbRequired: function thumbRequired() {
+      console.log("calc");
+      var suf = this.newPost.externalLink.substr(this.newPost.externalLink.length - 4);
+      return suf !== '.jpg' && suf !== '.png';
+    }
+  },
   methods: {
     submitPost: function submitPost() {
       //Init newPost error values to blank
-      this.newPost.titleError = this.newPost.bodyError = this.newPost.ajaxError = ""; //Client side validation, make sure there's a title and body
+      this.newPost.titleError = this.newPost.bodyError = this.newPost.ajaxError = this.newPost.imageLinkError = this.newPost.externalLinkError = ""; //Client side validation, make sure there's a title and body
 
-      if (this.newPost.title.length == 0) {
+      if (!this.newPost.title.length) {
         this.newPost.titleError = "Please include a title";
         return;
       }
 
-      if (this.newPost.description.length == 0) {
+      if (!this.newPost.description.length) {
         this.newPost.descriptionError = "Please include content in your " + this.postType;
         return;
       }
 
+      if (this.newPost.externalLink.length < 8) {
+        this.newPost.externalLinkError = "Please include an external link to an image, album, or webpage";
+        return;
+      }
+
+      if (this.newPost.externalLink.substr(0, 7) !== 'http://' && this.newPost.externalLink.substr(0, 8) !== 'https://') {
+        this.newPost.externalLinkError = "This link must begin with \"http://\" or \"https://\"";
+        return;
+      }
+
+      var suf = this.newPost.externalLink.substr(this.newPost.externalLink.length - 4);
+
+      if (suf !== '.jpg' && suf !== '.png') {
+        if (this.newPost.imageLink.length < 8) {
+          this.newPost.imageLinkError = "Your external link doesn't point directly to an image so please include a valid image link ending with \".jpg\" or \".png\"";
+          return;
+        }
+
+        if (this.newPost.imageLink.substr(0, 7) !== 'http://' && this.newPost.imageLink.substr(0, 8) !== 'https://') {
+          this.newPost.imageLinkError = "Please include a valid image link beginning with \"http://\" or \"https://\"";
+          return;
+        }
+
+        var suf2 = this.newPost.imageLink.substr(this.newPost.imageLink.length - 4);
+
+        if (suf2 !== '.jpg' && suf2 !== '.png') {
+          this.newPost.imageLinkError = "Invalid image link; it must end in \".jpg\" or \".png\"";
+          return;
+        }
+      } else {
+        this.newPost.imageLink = ""; // if (this.newPost.imageLink.length < 8) {
+        // 	this.newPost.ImageLinkError = "Please include a valid image link ending with \".jpg\" or \".png\"";
+        // 	return;
+        // }
+        // if (this.newPost.imageLink.substr(0, 7) !== 'http://' && this.newPost.imageLink.substr(0, 8) !== 'https://') {
+        // 	this.newPost.imageLinkError = "This link must begin with \"http://\" or \"https://\"";
+        // 	return;
+        // }
+        // const suf2 = this.newPost.imageLink.substr(this.newPost.imageLink.length-4);
+        // if (suf2 !== '.jpg' && suf2 !== '.png') {
+        // 	this.newPost.imageLinkError = "Invalid image link; it must end in \".jpg\" or \".png\"";
+        // 	return;
+        // }
+      }
+
       var data = {
-        hook_title: this.newPost.title,
-        item_description: this.newPost.description
+        title: this.newPost.title,
+        body: this.newPost.description,
+        external_link: this.newPost.externalLink,
+        image_link: this.newPost.imageLink
       };
       this.submit(data);
     },
@@ -3025,7 +3082,7 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     submitPost: function submitPost() {
       //Init newPost error values to blank
-      this.newPost.titleError = this.newPost.bodyError = this.newPost.ajaxError = ""; //Client side validation, make sure there's a title and body
+      this.newPost.titleError = this.newPost.bodyError = this.newPost.ajaxError = this.newPost.imageLinkError = this.newPost.externalLinkError = ""; //Client side validation, make sure there's a title and body
 
       if (this.newPost.title.length == 0) {
         this.newPost.titleError = "Please include a title";
@@ -7263,7 +7320,7 @@ var render = function() {
                   attrs: {
                     id: "post-external-link",
                     type: "text",
-                    placeholder: "External Link (optional)"
+                    placeholder: "External Link (required)"
                   },
                   domProps: { value: _vm.newPost.externalLink },
                   on: {
@@ -7288,34 +7345,46 @@ var render = function() {
                 ])
               : _vm._e(),
             _vm._v(" "),
-            _c("div", { staticClass: "field" }, [
-              _c("div", { staticClass: "control" }, [
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.newPost.imageLink,
-                      expression: "newPost.imageLink"
-                    }
-                  ],
-                  staticClass: "input is-large",
-                  attrs: {
-                    id: "post-image-link",
-                    type: "text",
-                    placeholder: "Image Link (optional)"
-                  },
-                  domProps: { value: _vm.newPost.imageLink },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
+            _vm.thumbRequired
+              ? _c("div", { staticClass: "field" }, [
+                  _c("div", { staticClass: "control" }, [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.newPost.imageLink,
+                          expression: "newPost.imageLink"
+                        }
+                      ],
+                      staticClass: "input is-large",
+                      attrs: {
+                        id: "post-image-link",
+                        type: "text",
+                        placeholder: "Image Link (.jpg or .png)"
+                      },
+                      domProps: { value: _vm.newPost.imageLink },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            _vm.newPost,
+                            "imageLink",
+                            $event.target.value
+                          )
+                        }
                       }
-                      _vm.$set(_vm.newPost, "imageLink", $event.target.value)
-                    }
-                  }
-                })
-              ])
+                    })
+                  ])
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _c("div", [
+              _vm._v(
+                '\n\t\t\t\t\tThe external link should point to an image, an album, or a web page that includes this map. If the external link does NOT point directly to an image file (ie a link ending in ".jpg" or ".png") then you must include an image link to be used as the thumbnail. \n\t\t\t\t'
+              )
             ]),
             _vm._v(" "),
             _c(
@@ -7384,27 +7453,42 @@ var render = function() {
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "description puzzle" }, [
-      _c("a", { attrs: { href: _vm.post.link, target: "_blank" } }, [
-        _vm.showExternalImages
-          ? _c("img", {
-              staticClass: "external-image",
-              attrs: {
-                ALIGN: "left",
-                src: "map_thumbs/" + _vm.post.id + ".jpg"
-              }
-            })
-          : _vm._e()
-      ]),
+      _c(
+        "a",
+        {
+          attrs: {
+            href:
+              _vm.post.img ||
+              _vm.post.image_link ||
+              _vm.post.link ||
+              _vm.post.external_link,
+            target: "_blank"
+          }
+        },
+        [
+          _c("img", {
+            staticClass: "external-image",
+            attrs: { ALIGN: "left", src: "/map_thumbs/" + _vm.post.id + ".jpg" }
+          })
+        ]
+      ),
       _vm._v(" "),
-      _c("span", [_vm._v(_vm._s(_vm.post.description))]),
+      _c("span", [_vm._v(_vm._s(_vm.post.description || _vm.post.body))]),
       _vm._v(" "),
-      _vm.post.link
+      _vm.post.link || _vm.post.external_link
         ? _c("div", { staticClass: "external-link" }, [
             _c("span", { staticClass: "bold" }, [_vm._v("External Link:")]),
             _vm._v(" "),
-            _c("a", { attrs: { href: _vm.post.link, target: "_blank" } }, [
-              _vm._v(_vm._s(_vm.post.link))
-            ])
+            _c(
+              "a",
+              {
+                attrs: {
+                  href: _vm.post.link || _vm.post.external_link,
+                  target: "_blank"
+                }
+              },
+              [_vm._v(_vm._s(_vm.post.link || _vm.post.external_link))]
+            )
           ])
         : _vm._e()
     ])
