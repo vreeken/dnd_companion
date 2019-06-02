@@ -1,11 +1,11 @@
 <template>
 	<div>
 		<div class="post-title">
-			<div>{{ post.title }}</div>
+			<div>{{ post.title || post.hook_title }}</div>
 		</div>
 		<div class="post-description">
 			<div class="description">
-				{{ post.description }}
+				{{ post.description || post.body || post.hook_body }}
 			</div>
 		</div>
 	</div>

@@ -68,8 +68,8 @@ export default {
 				return;
 			}
 			var data = {
-				hook_body: this.newPost.body,
-				hook_title: this.newPost.title
+				body: this.newPost.body,
+				title: this.newPost.title
 			}
 
 
