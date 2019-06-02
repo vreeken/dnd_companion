@@ -86,10 +86,21 @@ export default {
 				return;
 			}
 
+			if (this.newPost.imageLink.length) {
+				const suf = this.newPost.imageLink.substr(this.newPost.imageLink.length-4);
+				if (suf !== '.jpg' && suf !== '.png') {
+					this.newPost.imageLinkError = "Invalid image link; it must end in \".jpg\" or \".png\"";
+					return;
+				}
+			}
+
+
 
 			var data = {
-				hook_title: this.newPost.title,
-				item_description: this.newPost.description,
+				title: this.newPost.title,
+				body: this.newPost.description,
+				external_link: this.newPost.externalLink,
+				image_link: this.newPost.imageLink
 			}
 
 			this.submit(data);
