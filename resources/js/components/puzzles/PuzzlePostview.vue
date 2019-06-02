@@ -1,11 +1,11 @@
 <template>
 	<div>
 		<div class="post-title">
-			<div>{{ post.title }}</div>
+			<div>{{ post.title || post.puzzle_title }}</div>
 		</div>
 		<div class="description puzzle">
 			<img v-if="showExternalImages && post.image_link" class="external-image" ALIGN="left" :src="post.image_link"> 
-			{{ post.description }}
+			{{ post.description || post.body}}
 			<div v-if="post.external_link" class="external-link">
 				<span class="bold">External Link:</span> <a :href="post.external_link" target="_blank">{{ post.external_link }}</a>
 			</div>
