@@ -14,15 +14,18 @@ class HookController extends ParentPostController {
 	}
 
 	public function submitPost(Request $request) {
-		if (!$request->has($this->model->POST_TYPE.'_title') || !$request->has($this->model->POST_TYPE.'_body')) {
-			return response()->json(['error'=>'invalid_parameters'], 400);
+		if (!$request->has($this->model->POST_TYPE.'_title') && !$request->has('title')) {
+			return response()->json(['error'=>'invalid_parameters', 'msg'=>'Missing title param'], 400);
+		}
+		if (!$request->has($this->model->POST_TYPE.'_body') && !$request->has('body')) {
+			return response()->json(['error'=>'invalid_parameters', 'msg'=>'Missing body param'], 400);
 		}
 
 		$post = new Hook;
 		$postVote = new HookVote;
 
-		$post->title = $request->input($this->model->POST_TYPE.'_title');
-        $post->description = $request->input($this->model->POST_TYPE.'_body');
+		$post->title = $request->has($this->model->POST_TYPE.'_title') ? $request->input($this->model->POST_TYPE.'_title') : $request->input('title');
+        $post->description = $request->has($this->model->POST_TYPE.'_body') ? $request->input($this->model->POST_TYPE.'_body') : $request->input('body');
 
 		return $this->_submitPost($post, $postVote, $request);
 	}
