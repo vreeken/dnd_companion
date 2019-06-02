@@ -496,8 +496,8 @@ class MainController extends Controller {
 				if (!$request->has('title') || strlen($request->input('title'))==0 || !$request->has('description') || strlen($request->input('description'))==0) {
 					break;
 				}
-				$external_link = $request->has('external_link') ? $request->input('external_link') : "";
-				$image_link = $request->has('image_link') ? $request->input('image_link') : "";
+				$external_link = $request->has('external_link') && $request->input('external_link') !== null ? $request->input('external_link') : "";
+				$image_link = $request->has('image_link') && $request->input('image_link') !== null ? $request->input('image_link') : "";
 				if (Puzzle::where('id', $id)->where('user_id', $uid)->update(['title' => $request->input('title'), 'description'=>$request->input('description'),
 						'external_link'=>$external_link, 'image_link'=>$image_link])) {
 					return response()->json(['success'=>'success']);
@@ -526,7 +526,7 @@ class MainController extends Controller {
 				if (!$request->has('title') || strlen($request->input('title'))==0 || !$request->has('description') || strlen($request->input('description'))==0) {
 					break;
 				}
-				$link=$request->has('link') ? $request->input('link') : "";
+				$link=$request->has('link') && $request->input('link') !== null ? $request->input('link') : "";
 				if (Map::where('id', $id)->where('user_id', $uid)->update(['title' => $request->input('title'), 'description'=>$request->input('description'),
 						'link'=>$link])) {
 					if ($request->has('envs')) {
