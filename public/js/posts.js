@@ -199,8 +199,11 @@ __webpack_require__.r(__webpack_exports__);
       SORT_BY_METHODS: ["r", "uv", "dv", "dd", "da"],
       CURR_BASE_URL: this.data.base_url + '/' + this.data.post_type + 's',
       SUBMIT_COMMENT_URL: this.data.api_url + '/comments/new',
+      SUBMIT_POST_URL: this.data.api_url + '/' + this.data.post_type + 's/new',
       GET_COMMENTS_URL: this.data.api_url + '/comments/get',
       UPDATE_COMMENT_URL: this.data.api_url + '/comments/update',
+      SAVE_OPTIONS_URL: this.data.api_url + '/save-options',
+      USERNAME: this.data.username,
       postTypeNewPost: this.data.post_type + '-newpost',
       sortByMethod: 0,
       filterByMethod: 0,
@@ -260,6 +263,9 @@ __webpack_require__.r(__webpack_exports__);
     });
     _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('closePost', function () {
       _this2.closePost();
+    });
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('submitNewPost', function (p) {
+      _this2.submitNewPost(p);
     });
     _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('newPostCreated', function (p) {
       _this2.newPostCreated(p);
@@ -754,6 +760,56 @@ __webpack_require__.r(__webpack_exports__);
       }, null, this.CURR_BASE_URL + '#new');
       this.showingNewPost = true;
     },
+    submitNewPost: function submitNewPost(data) {
+      console.log(data);
+
+      var _this = this;
+
+      axios.post(this.SUBMIT_POST_URL, data, config).then(function (response) {
+        if (response.data.success) {
+          _this.showingNewPost = false;
+          var p = data;
+          p.comments = [];
+          p.id = response.data.id;
+          p.upvotes = 1;
+          p.downvotes = 0;
+          p.created_at = _this.now();
+          p.username = _this.USERNAME; //_this.$root.$emit('newPostCreated', p);
+
+          _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('newPostCreatedSuccessfully');
+
+          _this.newPostCreated(p); //_this.clearPost();
+
+        } else {
+          //Unknown Error
+          _this.newPost.ajaxError = "An error has occurred. Please try again.";
+        }
+      }).catch(function (error) {
+        console.log("ERROR");
+        console.log(error); //console.log(error.response.headers);
+        //console.log(error.response.data);
+        //invalid_parameters
+        //db_error
+
+        _this.newPost.ajaxError = "An error has occurred. Please try again.";
+      });
+    },
+    now: function now() {
+      var date = new Date();
+      var aaaa = date.getFullYear();
+      var gg = date.getDate();
+      var mm = date.getMonth() + 1;
+      if (gg < 10) gg = "0" + gg;
+      if (mm < 10) mm = "0" + mm;
+      var cur_day = aaaa + "-" + mm + "-" + gg;
+      var hours = date.getHours();
+      var minutes = date.getMinutes();
+      var seconds = date.getSeconds();
+      if (hours < 10) hours = "0" + hours;
+      if (minutes < 10) minutes = "0" + minutes;
+      if (seconds < 10) seconds = "0" + seconds;
+      return cur_day + " " + hours + ":" + minutes + ":" + seconds + 'Z';
+    },
     newPostCreated: function newPostCreated(p) {
       this.hideNewPost(); //TODO Optimize
       //For some reason if there isn't a delay before calling viewPost() then the post isn't shown
@@ -982,13 +1038,12 @@ __webpack_require__.r(__webpack_exports__);
 
       var _this = this;
 
-      axios.post(SAVE_OPTIONS_URL, {
+      axios.post(this.SAVE_OPTIONS_URL, {
         option: 'showExternalImages',
         value: !this.showExternalImages
       }, config).then(function (response) {}).catch(function (error) {//
         //_this.showExternalImages=!_this.showExternalImages;
       }).then(function () {
-        console.log('done');
         _this.ajaxingShowExternalImages = false;
       });
     },
@@ -1026,11 +1081,15 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./eventbus/EventBus.js */ "./resources/js/components/eventbus/EventBus.js");
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {},
   props: {
     postType: String,
-    postTypePretty: String
+    postTypePretty: String,
+    submitPostUrl: String,
+    username: String
   },
   data: function data() {
     return {
@@ -1039,44 +1098,79 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {},
   created: function created() {
-    console.log(this.props);
     this.clearPost();
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on('newPostCreatedSuccessfully', function () {
+      _this.clearPost();
+    });
   },
   methods: {
     submit: function submit(data) {
-      var _this = this;
-
-      axios.post(SUBMIT_POST_URL, data, config).then(function (response) {
-        if (response.data.success) {
-          _this.showingNewPost = false;
-          var p = {
-            title: _this.newPost.title,
-            body: _this.newPost.body,
-            comments: [],
-            id: response.data.id,
-            upvotes: 1,
-            downvotes: 0,
-            created_at: moment().format('YYYY-MM-DD HH:mm:ssZ'),
-            username: USERNAME
-          };
-
-          _this.$root.$emit('newPostCreated', p);
-
-          _this.clearPost();
-        } else {
-          //Unknown Error
-          _this.newPost.ajaxError = "An error has occurred. Please try again.";
-        }
-      }).catch(function (error) {
-        console.log("ERROR");
-        console.log(error); //console.log(error.response.headers);
-        //console.log(error.response.data);
-        //invalid_parameters
-        //db_error
-
-        _this.newPost.ajaxError = "An error has occurred. Please try again.";
-      });
+      _eventbus_EventBus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit('submitNewPost', data);
     }
+    /*
+    submit: function(data) {
+    	let _this = this;
+    	axios.post(this.submitPostUrl, data, config)
+    		.then(function(response) {
+    			if (response.data.success) {
+    				_this.showingNewPost=false;
+    				var p = {
+    					title: _this.newPost.title,
+    					body: _this.newPost.body,
+    					comments: [],
+    					id: response.data.id,
+    					upvotes: 1,
+    					downvotes: 0,
+    					created_at: _this.now(),
+    					username: _this.username
+    				}
+    						_this.$root.$emit('newPostCreated', p);
+    					
+    				_this.clearPost();
+    			}
+    			else {
+    				//Unknown Error
+    				_this.newPost.ajaxError = "An error has occurred. Please try again.";
+    			}
+    		})
+    		.catch(function(error) {
+    			console.log("ERROR");
+    			console.log(error);
+    			//console.log(error.response.headers);
+    			//console.log(error.response.data);
+    			//invalid_parameters
+    			//db_error
+    			_this.newPost.ajaxError = "An error has occurred. Please try again.";
+    		});
+    		
+    },
+    now: function() {
+    	var date = new Date();
+    	var aaaa = date.getFullYear();
+    	var gg = date.getDate();
+    	var mm = (date.getMonth() + 1);
+    			if (gg < 10)
+    	    gg = "0" + gg;
+    			if (mm < 10)
+    	    mm = "0" + mm;
+    			var cur_day = aaaa + "-" + mm + "-" + gg;
+    			var hours = date.getHours()
+    	var minutes = date.getMinutes()
+    	var seconds = date.getSeconds();
+    			if (hours < 10)
+    	    hours = "0" + hours;
+    			if (minutes < 10)
+    	    minutes = "0" + minutes;
+    			if (seconds < 10)
+    	    seconds = "0" + seconds;
+    			return cur_day + " " + hours + ":" + minutes + ":" + seconds+'Z';
+    		}
+    */
+
   },
   clearPost: function clearPost() {
     //Overridden in each child class
@@ -1173,7 +1267,8 @@ __webpack_require__.r(__webpack_exports__);
     post: Object,
     comments: Array,
     commentsLoading: Boolean,
-    componentPostType: String
+    componentPostType: String,
+    showExternalImages: Boolean
   },
   data: function data() {
     return {
@@ -2383,8 +2478,8 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       var data = {
-        hook_body: this.newPost.body,
-        hook_title: this.newPost.title
+        body: this.newPost.body,
+        title: this.newPost.title
       };
       this.submit(data);
     },
@@ -2561,9 +2656,20 @@ __webpack_require__.r(__webpack_exports__);
         return;
       }
 
+      if (this.newPost.imageLink.length) {
+        var suf = this.newPost.imageLink.substr(this.newPost.imageLink.length - 4);
+
+        if (suf !== '.jpg' && suf !== '.png') {
+          this.newPost.imageLinkError = "Invalid image link; it must end in \".jpg\" or \".png\"";
+          return;
+        }
+      }
+
       var data = {
-        hook_title: this.newPost.title,
-        item_description: this.newPost.description
+        title: this.newPost.title,
+        body: this.newPost.description,
+        external_link: this.newPost.externalLink,
+        image_link: this.newPost.imageLink
       };
       this.submit(data);
     },
@@ -2931,9 +3037,20 @@ __webpack_require__.r(__webpack_exports__);
         return;
       }
 
+      if (this.newPost.imageLink.length) {
+        var suf = this.newPost.imageLink.substr(this.newPost.imageLink.length - 4);
+
+        if (suf !== '.jpg' && suf !== '.png') {
+          this.newPost.imageLinkError = "Invalid image link; it must end in \".jpg\" or \".png\"";
+          return;
+        }
+      }
+
       var data = {
-        hook_title: this.newPost.title,
-        item_description: this.newPost.description
+        title: this.newPost.title,
+        body: this.newPost.description,
+        external_link: this.newPost.externalLink,
+        image_link: this.newPost.imageLink
       };
       this.submit(data);
     },
@@ -3134,9 +3251,6 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ViewBase_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ViewBase.vue */ "./resources/js/components/ViewBase.vue");
-//
-//
-//
 //
 //
 //
@@ -4035,7 +4149,8 @@ var render = function() {
                   post: _vm.currPost,
                   comments: _vm.currPostComments,
                   "comments-loading": _vm.commentsLoading,
-                  "component-post-type": _vm.POST_TYPE
+                  "component-post-type": _vm.POST_TYPE,
+                  "show-external-images": _vm.showExternalImages
                 }
               })
             : _vm._e()
@@ -4048,7 +4163,9 @@ var render = function() {
             tag: "component",
             attrs: {
               "post-type": _vm.POST_TYPE,
-              "post-type-pretty": _vm.POST_TYPE_PRETTY
+              "post-type-pretty": _vm.POST_TYPE_PRETTY,
+              "submit-post-url": _vm.SUBMIT_POST_URL,
+              username: _vm.USERNAME
             },
             on: {
               hideNewPost: function($event) {
@@ -4431,7 +4548,10 @@ var render = function() {
             [
               _c(_vm.postTypePostview, {
                 tag: "component",
-                attrs: { post: _vm.post }
+                attrs: {
+                  post: _vm.post,
+                  "show-external-images": _vm.showExternalImages
+                }
               }),
               _vm._v(" "),
               _c("div", { staticClass: "post-date" }, [
@@ -6568,12 +6688,18 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", [
     _c("div", { staticClass: "post-title" }, [
-      _c("div", [_vm._v(_vm._s(_vm.post.title))])
+      _c("div", [_vm._v(_vm._s(_vm.post.title || _vm.post.hook_title))])
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "post-description" }, [
       _c("div", { staticClass: "description" }, [
-        _vm._v("\n\t\t\t" + _vm._s(_vm.post.description) + "\n\t\t")
+        _vm._v(
+          "\n\t\t\t" +
+            _vm._s(
+              _vm.post.description || _vm.post.body || _vm.post.hook_body
+            ) +
+            "\n\t\t"
+        )
       ])
     ])
   ])
@@ -6901,7 +7027,7 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", [
     _c("div", { staticClass: "post-title" }, [
-      _c("div", [_vm._v(_vm._s(_vm.post.title))])
+      _c("div", [_vm._v(_vm._s(_vm.post.title || _vm.post.item_title))])
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "description puzzle" }, [
@@ -6911,7 +7037,9 @@ var render = function() {
             attrs: { ALIGN: "left", src: _vm.post.image_link }
           })
         : _vm._e(),
-      _vm._v(" \n\t\t" + _vm._s(_vm.post.description) + "\n\t\t"),
+      _vm._v(
+        " \n\t\t" + _vm._s(_vm.post.description || _vm.post.body) + "\n\t\t"
+      ),
       _vm.post.external_link
         ? _c("div", { staticClass: "external-link" }, [
             _c("span", { staticClass: "bold" }, [_vm._v("External Link:")]),
@@ -7605,7 +7733,7 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", [
     _c("div", { staticClass: "post-title" }, [
-      _c("div", [_vm._v(_vm._s(_vm.post.title))])
+      _c("div", [_vm._v(_vm._s(_vm.post.title || _vm.post.puzzle_title))])
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "description puzzle" }, [
@@ -7615,7 +7743,9 @@ var render = function() {
             attrs: { ALIGN: "left", src: _vm.post.image_link }
           })
         : _vm._e(),
-      _vm._v(" \n\t\t" + _vm._s(_vm.post.description) + "\n\t\t"),
+      _vm._v(
+        " \n\t\t" + _vm._s(_vm.post.description || _vm.post.body) + "\n\t\t"
+      ),
       _vm.post.external_link
         ? _c("div", { staticClass: "external-link" }, [
             _c("span", { staticClass: "bold" }, [_vm._v("External Link:")]),
@@ -7883,31 +8013,9 @@ var render = function() {
     _vm._v(" "),
     !_vm.post.minimized
       ? _c("div", { staticClass: "post-description" }, [
-          _vm.post.revealed
-            ? _c(
-                "div",
-                {
-                  staticClass: "description riddle",
-                  on: {
-                    click: function($event) {
-                      _vm.post.revealed = false
-                    }
-                  }
-                },
-                [_vm._v("\n\t\t\t" + _vm._s(_vm.post.answer) + "\n\t\t")]
-              )
-            : _c(
-                "div",
-                {
-                  staticClass: "description riddle-reveal",
-                  on: {
-                    click: function($event) {
-                      _vm.post.revealed = true
-                    }
-                  }
-                },
-                [_vm._v("\n\t\t\tClick to reveal\n\t\t")]
-              )
+          _c("div", { staticClass: "description riddle" }, [
+            _vm._v("\n\t\t\t" + _vm._s(_vm.post.answer) + "\n\t\t")
+          ])
         ])
       : _vm._e()
   ])
