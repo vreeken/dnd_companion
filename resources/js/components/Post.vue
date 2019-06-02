@@ -19,7 +19,7 @@
 				</div>
 				<div class="post-content">
 					<div class="">
-						<component :is="postTypePostview" :post="post" />
+						<component :is="postTypePostview" :post="post" :show-external-images="showExternalImages" />
 						<div class="post-date">
 							Submitted 
 							<time :title="post.created_at" class="">{{ post.created_at | fromNow }}</time> 
@@ -78,7 +78,8 @@ export default {
 		post: Object,
 		comments: Array,
 		commentsLoading: Boolean,
-		componentPostType: String
+		componentPostType: String,
+		showExternalImages: Boolean
 	},
 	data: function() {
 		return {
