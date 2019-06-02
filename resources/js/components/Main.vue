@@ -105,10 +105,10 @@
 				</div>
 			</div>
 
-			<post v-if="currPost" :post="currPost" :comments="currPostComments" :comments-loading="commentsLoading" :component-post-type="POST_TYPE" />
+			<post v-if="currPost" :post="currPost" :comments="currPostComments" :comments-loading="commentsLoading" :component-post-type="POST_TYPE" :show-external-images="showExternalImages" />
 		</div>
 
-		<component :is="postTypeNewPost" v-if="showingNewPost" @hideNewPost="hideNewPost()" :post-type="POST_TYPE" :post-type-pretty="POST_TYPE_PRETTY" />
+		<component :is="postTypeNewPost" v-if="showingNewPost" @hideNewPost="hideNewPost()" :post-type="POST_TYPE" :post-type-pretty="POST_TYPE_PRETTY" :submit-post-url="SUBMIT_POST_URL" :username="USERNAME" />
 
 		<div v-if="sharePost" id="share-modal" class="modal" :class="{'is-active': sharePost}">
 			<div class="modal-background" @click="hideShare()" />
@@ -192,8 +192,12 @@ export default {
 			SORT_BY_METHODS: ["r", "uv", "dv", "dd", "da"],
 			CURR_BASE_URL: this.data.base_url+'/'+this.data.post_type+'s',
 			SUBMIT_COMMENT_URL: this.data.api_url + '/comments/new',
+			SUBMIT_POST_URL: this.data.api_url + '/' + this.data.post_type + 's/new',
 			GET_COMMENTS_URL: this.data.api_url + '/comments/get',
 			UPDATE_COMMENT_URL: this.data.api_url + '/comments/update',
+			SAVE_OPTIONS_URL: this.data.api_url + '/save-options',
+
+			USERNAME: this.data.username,
 
 			postTypeNewPost: this.data.post_type + '-newpost',
 			sortByMethod: 0,
@@ -242,6 +246,7 @@ export default {
 		EventBus.$on('reportPost', (p) => { this.reportPost = p; });
 		EventBus.$on('toggleMinimized', (p) => { this.toggleMinimized(p); });
 		EventBus.$on('closePost', () => { this.closePost(); });
+		EventBus.$on('submitNewPost', (p) => { this.submitNewPost(p); });
 		EventBus.$on('newPostCreated', (p) => { this.newPostCreated(p); });
 		EventBus.$on('showLogin', (t) => { this.showLogin(t); });
 		//this.$on('hideNewPost', () => { this.hideNewPost(); });
@@ -739,6 +744,73 @@ export default {
 
 			this.showingNewPost=true;
 		},
+		submitNewPost: function(data) {
+			console.log(data);
+			let _this = this;
+			axios.post(this.SUBMIT_POST_URL, data, config)
+				.then(function(response) {
+					if (response.data.success) {
+						_this.showingNewPost=false;
+						let p = data;
+						p.comments = [];
+						p.id = response.data.id;
+						p.upvotes = 1;
+						p.downvotes = 0;
+						p.created_at = _this.now();
+						p.username = _this.USERNAME;
+						
+
+						//_this.$root.$emit('newPostCreated', p);
+						EventBus.$emit('newPostCreatedSuccessfully');
+						_this.newPostCreated(p);
+							
+						//_this.clearPost();
+					}
+					else {
+						//Unknown Error
+						_this.newPost.ajaxError = "An error has occurred. Please try again.";
+					}
+				})
+				.catch(function(error) {
+					console.log("ERROR");
+					console.log(error);
+					//console.log(error.response.headers);
+					//console.log(error.response.data);
+					//invalid_parameters
+					//db_error
+					_this.newPost.ajaxError = "An error has occurred. Please try again.";
+				});
+		},
+		now: function() {
+			var date = new Date();
+			var aaaa = date.getFullYear();
+			var gg = date.getDate();
+			var mm = (date.getMonth() + 1);
+
+			if (gg < 10)
+			    gg = "0" + gg;
+
+			if (mm < 10)
+			    mm = "0" + mm;
+
+			var cur_day = aaaa + "-" + mm + "-" + gg;
+
+			var hours = date.getHours()
+			var minutes = date.getMinutes()
+			var seconds = date.getSeconds();
+
+			if (hours < 10)
+			    hours = "0" + hours;
+
+			if (minutes < 10)
+			    minutes = "0" + minutes;
+
+			if (seconds < 10)
+			    seconds = "0" + seconds;
+
+			return cur_day + " " + hours + ":" + minutes + ":" + seconds+'Z';
+
+		},
 		newPostCreated: function(p) {
 			this.hideNewPost();
 
@@ -980,7 +1052,7 @@ export default {
 			this.ajaxingShowExternalImages=true;
 
 			const _this = this;
-			axios.post(SAVE_OPTIONS_URL, {
+			axios.post(this.SAVE_OPTIONS_URL, {
 				option: 'showExternalImages',
 				value: !this.showExternalImages,
 			}, config)
@@ -991,7 +1063,6 @@ export default {
 					//
 					//_this.showExternalImages=!_this.showExternalImages;
 				}).then(function() {
-					console.log('done');
 					_this.ajaxingShowExternalImages=false;
 				});
 		},
