@@ -1028,15 +1028,18 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   filters: {},
-  props: [],
+  props: {
+    postType: String,
+    postTypePretty: String
+  },
   data: function data() {
     return {
-      postType: POST_TYPE_PRETTY,
       newPost: {}
     };
   },
   computed: {},
   created: function created() {
+    console.log(this.props);
     this.clearPost();
   },
   methods: {
@@ -2360,7 +2363,6 @@ __webpack_require__.r(__webpack_exports__);
   extends: _NewPostBase_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
   data: function data() {
     return {
-      postType: POST_TYPE_PRETTY,
       newPost: this.clearPost()
     };
   },
@@ -3928,7 +3930,7 @@ var render = function() {
                     [
                       _vm._v(
                         "\n\t\t\t\t\t\tNew " +
-                          _vm._s(_vm.POST_TYPE) +
+                          _vm._s(_vm.POST_TYPE_PRETTY) +
                           "\n\t\t\t\t\t"
                       )
                     ]
@@ -4044,6 +4046,10 @@ var render = function() {
       _vm.showingNewPost
         ? _c(_vm.postTypeNewPost, {
             tag: "component",
+            attrs: {
+              "post-type": _vm.POST_TYPE,
+              "post-type-pretty": _vm.POST_TYPE_PRETTY
+            },
             on: {
               hideNewPost: function($event) {
                 return _vm.hideNewPost()

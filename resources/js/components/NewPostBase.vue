@@ -3,10 +3,12 @@ export default {
 	filters: {
 				
 	},
-	props: [],
+	props: {
+		postType: String,
+		postTypePretty: String
+	},
 	data: function() {
 		return {
-			postType: POST_TYPE_PRETTY,
 			newPost: {},
 		}
 	},
@@ -14,6 +16,7 @@ export default {
 				
 	},
 	created: function() {
+		console.log(this.props);
 		this.clearPost();
 	},
 	methods:{

@@ -46,7 +46,6 @@ export default {
 	extends: NewPostBase,
 	data: function() {
 		return {
-			postType: POST_TYPE_PRETTY,
 			newPost: this.clearPost(),
 		}
 	},

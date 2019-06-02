@@ -78,7 +78,7 @@
 					</div>
 					<div>
 						<div id="new-post-btn" class="button" @click="showNewPost()">
-							New {{ POST_TYPE }}
+							New {{ POST_TYPE_PRETTY }}
 						</div>
 					</div>
 				</div>
@@ -108,7 +108,7 @@
 			<post v-if="currPost" :post="currPost" :comments="currPostComments" :comments-loading="commentsLoading" :component-post-type="POST_TYPE" />
 		</div>
 
-		<component :is="postTypeNewPost" v-if="showingNewPost" @hideNewPost="hideNewPost()" />
+		<component :is="postTypeNewPost" v-if="showingNewPost" @hideNewPost="hideNewPost()" :post-type="POST_TYPE" :post-type-pretty="POST_TYPE_PRETTY" />
 
 		<div v-if="sharePost" id="share-modal" class="modal" :class="{'is-active': sharePost}">
 			<div class="modal-background" @click="hideShare()" />
