@@ -466,7 +466,7 @@ class MainController extends Controller {
 
 		$user=$this->getUser();
 		$uid = $user->id;
-		$id = intval($request->input('id'));
+		$id = (int) $request->input('id');
 		$type = $request->input('type');
 		
 		switch ($type) {
@@ -511,8 +511,8 @@ class MainController extends Controller {
 					return response()->json(['error'=>'invalid_parameters2'], 400);
 					break;
 				}
-				$external_link = $request->has('external_link') ? $request->input('external_link') : "";
-				$image_link = $request->has('image_link') ? $request->input('image_link') : "";
+				$external_link = $request->has('external_link') && $request->has('external_link') !== null ? $request->input('external_link') : "";
+				$image_link = $request->has('image_link') && $request->has('image_link') !== null ? $request->input('image_link') : "";
 				if (Item::where('id', $id)->where('user_id', $uid)->update(['title' => $request->input('title'), 'description'=>$request->input('description'),
 						'external_link'=>$external_link, 'image_link'=>$image_link])) {
 					return response()->json(['success'=>'success']);
