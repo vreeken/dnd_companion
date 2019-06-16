@@ -52,13 +52,13 @@
 		<div id="app" >
 				
 				@if (Auth::check())
-					<auth :authenticated="true" :username="'{{ Auth::user() ? Auth::user()->username : '' }}'"></auth>
+					<auth :authenticated="true" :username="'{{ Auth::user() ? Auth::user()->username : 'null' }}'"></auth>
 				@else
-					<auth :authenticated="false" :username=""></auth>
+					<auth :authenticated="false" :username="null"></auth>
 				@endif
 
 				<div class="body-container">
-				
+
 					<div class="container alerts-container">
 						@include('templates.partials.form-status')
 					</div>
