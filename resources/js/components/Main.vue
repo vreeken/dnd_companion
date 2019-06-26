@@ -366,11 +366,6 @@ export default {
 				return;
 			}
 
-			console.log(post);
-			console.log(parent_id);
-			console.log(comment);
-			console.log(comments);
-
 			var _this = this;
 			axios.post(this.SUBMIT_COMMENT_URL, {
 				post_type: this.POST_TYPE,
@@ -419,8 +414,6 @@ export default {
 				});
 		},
 		updateComment: function(comment, editedComment) {
-			console.log(comment);
-			console.log(editedComment);
 			//basic clientside validation
 			if (editedComment.body.length === 0) {
 				comment.bodyError='Please fill out your comment or click delete if you wish to remove your comment';
@@ -445,7 +438,6 @@ export default {
 				comment_id: comment.id
 			}, config)
 				.then(function(response) {
-					console.log(response);
 					if (response.data.success) {
 						comment.comment = editedComment.body;
 
@@ -745,7 +737,6 @@ export default {
 			this.showingNewPost=true;
 		},
 		submitNewPost: function(data) {
-			console.log(data);
 			let _this = this;
 			axios.post(this.SUBMIT_POST_URL, data, config)
 				.then(function(response) {
