@@ -4,10 +4,10 @@
 			<div>{{ post.title }}</div>
 		</div>
 		<div class="description puzzle">
-			<a :href="post.link" target="_blank"><img v-if="showExternalImages" class="external-image" ALIGN="left" :src="'map_thumbs/'+post.id+'.jpg'"></a>
-			<span>{{ post.description }}</span>
-			<div v-if="post.link" class="external-link">
-				<span class="bold">External Link:</span> <a :href="post.link" target="_blank">{{ post.link }}</a>
+			<a :href="post.img || post.image_link || post.link || post.external_link" target="_blank"><img class="external-image" ALIGN="left" :src="'/map_thumbs/'+post.id+'.jpg'"></a>
+			<span>{{ post.description || post.body }}</span>
+			<div v-if="post.link || post.external_link" class="external-link">
+				<span class="bold">External Link:</span> <a :href="post.link || post.external_link" target="_blank">{{ post.link || post.external_link }}</a>
 			</div>
 		</div>
 	</div>

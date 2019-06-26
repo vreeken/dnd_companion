@@ -74,7 +74,7 @@ export default {
 	methods:{
 		submitPost: function() {
 			//Init newPost error values to blank
-			this.newPost.titleError = this.newPost.bodyError = this.newPost.ajaxError = "";
+			this.newPost.titleError = this.newPost.bodyError = this.newPost.ajaxError = this.newPost.imageLinkError = this.newPost.externalLinkError = "";
 
 			//Client side validation, make sure there's a title and body
 			if (this.newPost.title.length == 0) {
