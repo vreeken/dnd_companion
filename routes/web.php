@@ -26,7 +26,7 @@ Route::post('auth/register', 'JWTAuthController@register');
 Route::get('auth/register', 'JWTAuthController@showRegister');
 
 Route::get('auth/reset-password', 'JWTAuthController@showResetPassword');
-
+Route::get('auth/forgot-password', 'JWTAuthController@showForgotPassword');
 
 
 //Route::get('/npcs/public/{id?}', 'NPCController@getPublicNPCsPage');

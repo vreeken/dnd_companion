@@ -225,6 +225,10 @@ class JwtAuthController extends Controller {
 		return response()->json(['error'=>'db_error'], 500);
 	}
 
+	public function showForgotPassword(Request $request) {
+		return view('auth/forgot_pw');
+	}
+
 	public function showResetPassword(Request $request) {
 		//TODO create basic form with two inputs, post to self with hidden token
 		if (!$request->has('t')) {

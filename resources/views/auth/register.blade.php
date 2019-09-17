@@ -70,7 +70,7 @@
 			</div>
 			<p class="has-text-grey">
 				<a href="{{ url('auth/login') }}">Log in</a> &nbsp;·&nbsp;
-				<a href="{{ url('auth/reset-password') }}">Forgot Password</a><!-- &nbsp;·&nbsp;
+				<a href="{{ url('auth/forgot-password') }}">Forgot Password</a><!-- &nbsp;·&nbsp;
 				<a href="{{ url('') }}">Need Help?</a>-->
 			</p>
 		</div>
