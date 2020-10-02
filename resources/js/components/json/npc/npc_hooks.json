@@ -44,6 +44,7 @@
 	"is strangely followed by multiple animals at all time.",
 	"wants the PCs help to tame a beast (troll, wolf, imp, fairy, etc).",
 	"has been cursed ({{curse}}) by a Wizard/Hag/Demon/etc)",
-	"needs the party to deliver {{item}} to {{entity}}."
+	"needs the party to deliver {{item}} to {{entity}}.",
+	"{{relative}} has just started to manifest arcane powers."
 	]
 }
